@@ -1,0 +1,21 @@
+<!-- Template base — todos os outros herdam daqui -->
+<!-- Contém: navbar, alertas flash, footer -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>🌦️ WeatherCards</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+</head>
+<body>
+    <!-- Navbar aqui -->
+
+    <!-- Mensagens flash aqui -->
+    {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
+        <div class="alerta {{ categoria }}">{{ mensagem }}</div>
+    {% endfor %}
+
+    <!-- Conteúdo da página -->
+    {% block conteudo %}{% endblock %}
+</body>
+</html>

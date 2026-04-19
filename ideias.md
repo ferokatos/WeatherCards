@@ -12,13 +12,13 @@ Cada cargo tem permissões diferentes na interface.
 
 ## 👥 Cargos e Permissões
 
-| Ação | Admin | Usuário Comum |
-|---|---|---|
-| Ver cidades salvas | ✅ | ✅ |
-| Adicionar cidade | ✅ | ✅ |
-| Editar cidade | ✅ (qualquer uma) | ✅ (só as próprias) |
-| Deletar cidade | ✅ | ❌ |
-| Gerenciar usuários | ✅ | ❌ |
+| Ação              | Admin             | Usuário Comum        |
+| ------------------- | ----------------- | --------------------- |
+| Ver cidades salvas  | ✅                | ✅                    |
+| Adicionar cidade    | ✅                | ✅                    |
+| Editar cidade       | ✅ (qualquer uma) | ✅ (só as próprias) |
+| Deletar cidade      | ✅                | ❌                    |
+| Gerenciar usuários | ✅                | ❌                    |
 
 ---
 
@@ -54,6 +54,7 @@ Cada cidade salva no sistema terá:
 ```
 
 ### Operações:
+
 - **Criar** → buscar cidade na API e salvar na lista
 - **Listar** → mostrar todas as cidades salvas
 - **Editar** → atualizar dados da cidade (busca novamente na API)
@@ -77,30 +78,36 @@ Cada cidade salva no sistema terá:
 ## 🔥 Funcionalidades
 
 ### 1. Login com cargos
+
 - Tela de login simples
 - Ao logar, salva o usuário e cargo na sessão
 - Rotas bloqueadas por cargo
 
 ### 2. Dashboard de cidades
+
 - Lista todas as cidades salvas
 - Mostra temperatura, condição e emoji do clima
 - Botões de editar/deletar aparecem conforme o cargo
 
 ### 3. Adicionar cidade
+
 - Campo de busca com nome da cidade
 - Busca dados na OpenWeather API
 - Salva na lista em memória
 
 ### 4. Editar cidade
+
 - Admin edita qualquer cidade
 - Usuário comum edita só as que ele adicionou
 - Botão de editar some para cidades de outros usuários
 
 ### 5. Deletar cidade
+
 - Só o Admin vê o botão de deletar
 - Usuário comum não tem esse botão
 
 ### 6. Painel Admin
+
 - Lista todos os usuários cadastrados
 - Mostra cargo de cada um
 - Só acessível pelo Admin
@@ -145,13 +152,13 @@ weathercards_web/
 
 ## 👥 Divisão do Grupo (5 pessoas)
 
-| Pessoa | Responsabilidade | Branch |
-|---|---|---|
-| Pessoa 1 | Login + sessão + controle de cargos | `feature/auth` |
-| Pessoa 2 | CRUD de cidades (criar + listar) | `feature/crud-cidades` |
-| Pessoa 3 | CRUD de cidades (editar + deletar) | `feature/crud-editar` |
-| Pessoa 4 | Integração com API OpenWeather | `feature/api-weather` |
-| Pessoa 5 | Painel Admin + templates base | `feature/admin` |
+| Pessoa   | Responsabilidade                     | Branch                   |
+| -------- | ------------------------------------ | ------------------------ |
+| Pessoa 1 | Login + sessão + controle de cargos | `feature/auth`         |
+| Pessoa 2 | CRUD de cidades (criar + listar)     | `feature/crud-cidades` |
+| Pessoa 3 | CRUD de cidades (editar + deletar)   | `feature/crud-editar`  |
+| Pessoa 4 | Integração com API OpenWeather     | `feature/api-weather`  |
+| Pessoa 5 | Painel Admin + templates base        | `feature/admin`        |
 
 ---
 

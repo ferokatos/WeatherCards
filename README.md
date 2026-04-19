@@ -11,6 +11,8 @@ python run.py
 
 Acesse: http://localhost:5000
 
+> Crie um arquivo `.env` na raiz do projeto com a chave OpenWeather em `OPENWEATHER_API_KEY`.
+
 ## 👥 Usuários padrão
 
 | Nome  | Senha     | Cargo   |

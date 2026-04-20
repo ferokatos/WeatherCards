@@ -26,7 +26,7 @@ class UsuarioAdmin(Usuario_padrao):
         self.cargo = "admin"
 
 #!--------------------------------------------------------------------------------
-#!                                     CIDADES
+#!                            CIDADES(descrições)
 #!--------------------------------------------------------------------------------
 
 #? Classe de cidades irá receber os dados da API, criando assim um flash_card

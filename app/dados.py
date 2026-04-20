@@ -1,20 +1,63 @@
-# Persistência em memória — sem banco de dados!
-# Aqui ficam os usuários e as cidades salvas
+#Aqui ficarão os dados locais(cache local) para o projeto, como por exemplo os usuários e as cidades, além de métodos para editar as cidades.
 
-# Lista de usuários do sistema
-USUARIOS = [
-    {"id": 1, "nome": "Admin", "senha": "admin123", "cargo": "admin"},
-    {"id": 2, "nome": "João",  "senha": "joao123",  "cargo": "usuario"},
-    {"id": 3, "nome": "Maria", "senha": "maria123", "cargo": "usuario"},
-]
+#!--------------------------------------------------------------------------------
+#!                                  USUÁRIO PADRÃO
+#!--------------------------------------------------------------------------------
 
-# Lista de cidades salvas
-CIDADES = []
+#? Classe usuário padrão poderá apenas vizualisar as cidades, não poderá criar, deletar ou editar cidades.
+class Usuario_padrao:
+    ID_atual = 1
+    def __init__(self,nome,email,senha):
+        self.nome = nome
+        self.email = email
+        self.senha = senha
+        self.id =Usuario_padrao.ID_atual
+        self.cargo = "padrão"
+        Usuario_padrao.ID_atual += 1
 
-# Controle de IDs
-_contador_id = 0
+#!--------------------------------------------------------------------------------
+#!                                  USUÁRIO ADMIN
+#!--------------------------------------------------------------------------------
 
-def proxima_id():
-    global _contador_id
-    _contador_id += 1
-    return _contador_id
+#? Classe usuário admin além de vizualisar as cidades, poderá criar, editar e deletar cidades
+class UsuarioAdmin(Usuario_padrao):
+    def __init__(self,nome,email,senha):
+        super().__init__(nome,email,senha)
+        self.cargo = "admin"
+
+#!--------------------------------------------------------------------------------
+#!                                     CIDADES
+#!--------------------------------------------------------------------------------
+
+#? Classe de cidades irá receber os dados da API, criando assim um flash_card
+class Cidades:
+    ID_atual = 1
+    def __init__(self,nome,pais,temperatura,umidade,vento,condicao):
+        self.nome = nome
+        self.pais = pais
+        self.temperatura = temperatura
+        self.umidade = umidade
+        self.vento = vento
+        self.condicao = condicao
+        self.id = Cidades.ID_atual
+        Cidades.ID_atual += 1
+    
+    #? Metódo que irá atualizar os dados da Cidade, e verificará o cargo de quem está tentando fazer essa alteração, caso Usuário padrão = Negado❌, caso Admin = permitido✅
+    def EditarCidades(self,nome=None,pais=None,temperatura=None,umidade=None,vento=None,condicao=None,cargo=None):
+        if cargo != "admin":
+            return "Acesso negado! Apenas usuários admin podem editar as cidades."
+        else:
+            if nome is not None:
+                self.nome = nome
+            if pais is not None:
+                self.pais = pais
+            if temperatura is not None:
+                self.temperatura = temperatura
+            if umidade is not None:
+                self.umidade = umidade
+            if vento is not None:
+                self.vento = vento
+            if condicao is not None:
+                self.condicao = condicao
+            return "Cidade atualizada com sucesso!"
+

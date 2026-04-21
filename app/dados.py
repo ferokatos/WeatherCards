@@ -6,14 +6,16 @@
 
 #? Classe usuário padrão poderá apenas vizualisar as cidades, não poderá criar, deletar ou editar cidades.
 class Usuario_padrao:
+    USUARIOS = []
     ID_atual = 1
-    def __init__(self,nome,email,senha):
+    def __init__(self,nome:str,email:str,senha:str):
         self.nome = nome
         self.email = email
         self.senha = senha
         self.id =Usuario_padrao.ID_atual
         self.cargo = "padrão"
         Usuario_padrao.ID_atual += 1
+        Usuario_padrao.USUARIOS.append(self)
 
 #!--------------------------------------------------------------------------------
 #!                                  USUÁRIO ADMIN
@@ -21,7 +23,7 @@ class Usuario_padrao:
 
 #? Classe usuário admin além de vizualisar as cidades, poderá criar, editar e deletar cidades
 class UsuarioAdmin(Usuario_padrao):
-    def __init__(self,nome,email,senha):
+    def __init__(self,nome:str,email:str,senha:str):
         super().__init__(nome,email,senha)
         self.cargo = "admin"
 
@@ -32,7 +34,7 @@ class UsuarioAdmin(Usuario_padrao):
 #? Classe de cidades irá receber os dados da API, criando assim um flash_card
 class Cidades:
     ID_atual = 1
-    def __init__(self,nome,pais,temperatura,umidade,vento,condicao):
+    def __init__(self,nome:str,pais:str,temperatura:float,umidade:float,vento:float,condicao:str):
         self.nome = nome
         self.pais = pais
         self.temperatura = temperatura
@@ -61,3 +63,7 @@ class Cidades:
                 self.condicao = condicao
             return "Cidade atualizada com sucesso!"
 
+if __name__ == "__main__":
+    #? Criando usuários para teste
+    usuario1 = Usuario_padrao("João Silva", "joao@email.com","senha123")
+    usuario2 = UsuarioAdmin("Maria Oliveira", "maria@email.com","senha456")

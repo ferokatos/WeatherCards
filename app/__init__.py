@@ -7,10 +7,11 @@ def criar_app():
     app.secret_key = "weathercards_secret"
 
     # Registrar rotas aqui (quando forem criadas)
-    # from app.routes.auth    import auth_bp
+    from app.routes.auth    import auth_bp
     # from app.routes.cidades import cidades_bp
     # from app.routes.admin   import admin_bp
-    # app.register_blueprint(auth_bp)
+
+    app.register_blueprint(auth_bp)
     # app.register_blueprint(cidades_bp)
     # app.register_blueprint(admin_bp)
 

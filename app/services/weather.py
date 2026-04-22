@@ -8,7 +8,7 @@ import requests
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
-API_KEY = os.getenv("OPENWEATHER_API_KEY", "INSIRA_SUA_CHAVE_NA_ENV")
+API_KEY = os.getenv("OPENWEATHER_API_KEY", "2a79b1d791ec76bc0c714a36401ed402")
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 DEFAULT_UNITS = "metric"
 DEFAULT_LANG = "pt_br"
@@ -130,18 +130,18 @@ def get_emoji(condicao):
     return "🌈"
 
 
-# if __name__ == "__main__":
-#     teste_cidades = ["São Paulo", "Londres", "Maceió", "Groenlandia"]
+if __name__ == "__main__":
+    teste_cidades = ["São Paulo", "Londres", "Maceió", "Groenlandia"]
 
-#     for cidade in teste_cidades:
-#         try:
-#             resultado = buscar_clima(cidade)
-#             print(f"\nCidade: {resultado['nome']}, {resultado['pais']}")
-#             print(f"Temperatura: {resultado['temperatura']} °C")
-#             print(f"Umidade: {resultado['umidade']} %")
-#             print(f"Vento: {resultado['vento']} m/s")
-#             print(f"Condição: {resultado['condicao']} {resultado['emoji']}")
-#         except WeatherServiceError as exc:
-#             print(f"Erro ao buscar clima para '{cidade}': {exc}")
-#         except Exception as exc:
-#             print(f"Erro inesperado para '{cidade}': {exc}")
+    for cidade in teste_cidades:
+        try:
+            resultado = buscar_clima(cidade)
+            print(f"\nCidade: {resultado['nome']}, {resultado['pais']}")
+            print(f"Temperatura: {resultado['temperatura']} °C")
+            print(f"Umidade: {resultado['umidade']} %")
+            print(f"Vento: {resultado['vento']} m/s")
+            print(f"Condição: {resultado['condicao']} {resultado['emoji']}")
+        except WeatherServiceError as exc:
+            print(f"Erro ao buscar clima para '{cidade}': {exc}")
+        except Exception as exc:
+            print(f"Erro inesperado para '{cidade}': {exc}")

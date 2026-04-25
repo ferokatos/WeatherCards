@@ -1,5 +1,47 @@
-<!-- Dashboard principal — lista de cidades -->
 {% extends "base.html" %}
+
 {% block conteudo %}
-    <!-- Lista de cidades + botões conforme cargo -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+        <h2>Dashboard Climático</h2>
+        <a href="{{ url_for('cidades.adicionar') }}" class="btn">Nova Cidade</a>
+    </div>
+
+    {% if cidades %}
+        <div class="grid-cidades">
+            {% for cidade in cidades %}
+                <div class="card-cidade">
+                    <h2>{{ cidade.nome }}, {{ cidade.pais }}</h2>
+                    <div class="emoji">{{ cidade.emoji }}</div>
+                    <div class="temperatura">{{ cidade.temperatura }}°C</div>
+                    <div class="detalhes">
+                        {{ cidade.condicao }}<br>
+                        Umidade: {{ cidade.umidade }}% | Vento: {{ cidade.vento }}m/s<br>
+                        <small>Adicionado por: {{ cidade.adicionado_por_nome }}</small>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <!-- Regras de Exibição dos Botões -->
+                        {% set is_dono = session.get('usuario_id') == cidade.adicionado_por_id %}
+                        {% set is_admin = session.get('cargo') == 'admin' %}
+                        
+                        {% if is_dono or is_admin %}
+                            <a href="{{ url_for('cidades.editar', id=cidade.id) }}" class="btn">Editar</a>
+                        {% endif %}
+                        
+                        {% if is_admin %}
+                            <form action="{{ url_for('cidades.deletar', id=cidade.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja deletar {{ cidade.nome }}?');">
+                                    Excluir
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center; color: var(--text-light); margin-top: 2rem;">
+            Nenhuma cidade cadastrada ainda. Seja o primeiro a adicionar!
+        </p>
+    {% endif %}
 {% endblock %}

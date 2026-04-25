@@ -1,21 +1,43 @@
 <!-- Template base — todos os outros herdam daqui -->
-<!-- Contém: navbar, alertas flash, footer -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌦️ WeatherCards</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
 </head>
 <body>
-    <!-- Navbar aqui -->
+    <!-- Navbar com links condicionados por acesso -->
+    <nav class="navbar">
+        <a href="{{ url_for('cidades.index') }}" class="logo">WeatherCards</a>
+        <div class="nav-links">
+            {% if session.get('usuario_id') %}
+                <span style="margin-right: 15px;">Olá, {{ session.get('usuario_nome') }}</span>
+                <a href="{{ url_for('cidades.index') }}">Dashboard</a>
+                <a href="{{ url_for('cidades.adicionar') }}">Adicionar Cidade</a>
+                
+                {% if session.get('cargo') == 'admin' %}
+                    <a href="{{ url_for('admin.painel') }}">Painel Admin</a>
+                {% endif %}
+                
+                <a href="{{ url_for('auth.logout') }}">Sair</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}">Login</a>
+                <a href="{{ url_for('auth.cadastro') }}">Cadastro</a>
+            {% endif %}
+        </div>
+    </nav>
 
-    <!-- Mensagens flash aqui -->
-    {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
-        <div class="alerta {{ categoria }}">{{ mensagem }}</div>
-    {% endfor %}
+    <!-- Container Central -->
+    <div class="container">
+        <!-- Mensagens flash do Flask -->
+        {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
+            <div class="alerta {{ categoria }}">{{ mensagem }}</div>
+        {% endfor %}
 
-    <!-- Conteúdo da página -->
-    {% block conteudo %}{% endblock %}
+        <!-- Conteúdo específico de cada página -->
+        {% block conteudo %}{% endblock %}
+    </div>
 </body>
 </html>

@@ -1,5 +1,43 @@
-<!-- Painel Admin — gerenciar usuários -->
 {% extends "base.html" %}
+
 {% block conteudo %}
-    <!-- Lista de usuários + cargos -->
+    <div style="margin-bottom: var(--spacing-lg);">
+        <h2>Painel de Controle Admin</h2>
+        <p style="color: var(--text-light);">Gerenciamento dos Usuários Registrados</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Cargo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.id }}</td>
+                    <td>{{ usuario.nome }}</td>
+                    <td>{{ usuario.email }}</td>
+                    <td>
+                        {% if usuario.cargo == 'admin' %}
+                            <span style="color: var(--danger-color); font-weight: bold;">{{ usuario.cargo | upper }}</span>
+                        {% else %}
+                            <span style="color: var(--primary-color);">{{ usuario.cargo | upper }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center;">Nenhum usuário cadastrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: var(--spacing-xl);">
+        <a href="{{ url_for('cidades.index') }}" class="btn">Voltar ao Dashboard</a>
+    </div>
 {% endblock %}

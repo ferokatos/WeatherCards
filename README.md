@@ -9,7 +9,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-Acesse: http://localhost:5000
+Acesse: http://127.0.0.1:5001
 
 > Crie um arquivo `.env` na raiz do projeto com a chave OpenWeather em `OPENWEATHER_API_KEY`.
 

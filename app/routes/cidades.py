@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from app.dados import Cidades, CIDADES_SALVAS, buscar_cidade_por_id
 from app.services.weather import buscar_clima, WeatherServiceError
@@ -115,3 +116,29 @@ def deletar(id):
         flash("Cidade não encontrada para exclusão.", "erro")
         
     return redirect(url_for("cidades.index"))
+=======
+# Rotas de CRUD de cidades: criar, listar, editar, deletar
+from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask_login import login_required, current_user
+from app import db
+from app.models import Cidade
+cidade = Blueprint('cidade', __name__)
+
+@cidade.route('/editar/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
+
+def editar_cidade(id):
+    cidade = Cidade.query.get_or_404(id)
+
+    if not current_user.is_admin and current_user.id != cidade.user_id:
+        abort(403) # probir acesso se não for admin ou dono da cidade
+
+        if request.method == 'POST':
+            #logica para editar a cidade
+            cidade.nome = request.form.get('nome')
+
+            db.session.commit()
+            return redirect(url_for('cidade.listar'))
+        
+    return render_template('editar_cidade.html', cidade=cidade)
+>>>>>>> aa6fac7 (Rotas da cidades finalizadas)

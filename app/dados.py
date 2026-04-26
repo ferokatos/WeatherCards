@@ -74,18 +74,11 @@ CIDADES_SALVAS = []
 
 #Função que irá adcionar uma cidade se o usuário for admin.
 def adicionar_cidade(cidade, cargo=None):
-    
-    if cargo != "admin":
-        return "Acesso negado! Apenas admin pode adicionar cidades."
-
     CIDADES_SALVAS.append(cidade)
     return f"Cidade '{cidade.nome}' adicionada com sucesso!"
 
 #Função que irá remover uma cidade pelo ID da cidade:
 def remover_cidade(cidade_id,cargo=None):
-    if cargo != "admin":
-        return "Acesso negado! Apenas admin pode remover cidades."
-
     for cidade in CIDADES_SALVAS:
         if cidade.id == cidade_id:
             CIDADES_SALVAS.remove(cidade)

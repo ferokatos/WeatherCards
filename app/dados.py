@@ -34,34 +34,36 @@ class UsuarioAdmin(Usuario_padrao):
 #? Classe de cidades irá receber os dados da API, criando assim um flash_card
 class Cidades:
     ID_atual = 1
-    def __init__(self,nome:str,pais:str,temperatura:float,umidade:float,vento:float,condicao:str):
+    def __init__(self, nome:str, pais:str, temperatura:float, umidade:float, vento:float, condicao:str, emoji:str, adicionado_por_id:int, adicionado_por_nome:str):
         self.nome = nome
         self.pais = pais
         self.temperatura = temperatura
         self.umidade = umidade
         self.vento = vento
         self.condicao = condicao
+        self.emoji = emoji
+        self.adicionado_por_id = adicionado_por_id
+        self.adicionado_por_nome = adicionado_por_nome
         self.id = Cidades.ID_atual
         Cidades.ID_atual += 1
     
-    #? Metódo que irá atualizar os dados da Cidade, e verificará o cargo de quem está tentando fazer essa alteração, caso Usuário padrão = Negado❌, caso Admin = permitido✅
-    def EditarCidades(self,nome=None,pais=None,temperatura=None,umidade=None,vento=None,condicao=None,cargo=None):
-        if cargo != "admin":
-            return "Acesso negado! Apenas usuários admin podem editar as cidades."
-        else:
-            if nome is not None:
-                self.nome = nome
-            if pais is not None:
-                self.pais = pais
-            if temperatura is not None:
-                self.temperatura = temperatura
-            if umidade is not None:
-                self.umidade = umidade
-            if vento is not None:
-                self.vento = vento
-            if condicao is not None:
-                self.condicao = condicao
-            return "Cidade atualizada com sucesso!"
+    def atualizar_clima(self, temperatura:float, umidade:float, vento:float, condicao:str, emoji:str):
+        """Atualiza os dados de clima da cidade mantendo quem adicionou intacto"""
+        self.temperatura = temperatura
+        self.umidade = umidade
+        self.vento = vento
+        self.condicao = condicao
+        self.emoji = emoji
+
+#? Repositório Global em Memória
+CIDADES_SALVAS = []
+
+def buscar_cidade_por_id(cidade_id):
+    """Busca uma cidade salva pelo ID"""
+    for cidade in CIDADES_SALVAS:
+        if cidade.id == cidade_id:
+            return cidade
+    return None
 
 #!--------------------------------------------------------------------------------
 #!                      REPOSITÓRIO GLOBAL DE CIDADES

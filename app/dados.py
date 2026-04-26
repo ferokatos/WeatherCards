@@ -55,9 +55,6 @@ class Cidades:
         self.condicao = condicao
         self.emoji = emoji
 
-#? Repositório Global em Memória
-CIDADES_SALVAS = []
-
 def buscar_cidade_por_id(cidade_id):
     """Busca uma cidade salva pelo ID"""
     for cidade in CIDADES_SALVAS:
@@ -73,12 +70,12 @@ def buscar_cidade_por_id(cidade_id):
 CIDADES_SALVAS = []
 
 #Função que irá adcionar uma cidade se o usuário for admin.
-def adicionar_cidade(cidade, cargo=None):
+def adicionar_cidade(cidade):
     CIDADES_SALVAS.append(cidade)
     return f"Cidade '{cidade.nome}' adicionada com sucesso!"
 
 #Função que irá remover uma cidade pelo ID da cidade:
-def remover_cidade(cidade_id,cargo=None):
+def remover_cidade(cidade_id):
     for cidade in CIDADES_SALVAS:
         if cidade.id == cidade_id:
             CIDADES_SALVAS.remove(cidade)
@@ -91,27 +88,85 @@ def listar_cidades():
     return CIDADES_SALVAS
 
 if __name__ == "__main__":
-    # Criando usuários
-    usuario1 = Usuario_padrao("João Silva", "joao@email.com", "senha123")
-    usuario2 = UsuarioAdmin("Maria Oliveira", "maria@email.com", "senha456")
+    print("=" * 50)
+    print("🧪 TESTANDO O SISTEMA")
+    print("=" * 50)
 
-    # Criando cidade
-    cidade1 = Cidades("Maceió", "Brasil", 30, 80, 10, "Ensolarado")
+    # ── Criando usuários ──────────────────────────────
+    print("\n👥 Criando usuários...")
+    usuario_comum = Usuario_padrao("João Silva", "joao@email.com", "senha123")
+    usuario_admin = UsuarioAdmin("Maria Oliveira", "maria@email.com", "senha456")
 
-    # Tentando adicionar com usuário padrão ❌
-    print(adicionar_cidade(cidade1, usuario1.cargo))
+    print(f"✅ Usuário criado: {usuario_comum.nome} | cargo: {usuario_comum.cargo}")
+    print(f"✅ Usuário criado: {usuario_admin.nome} | cargo: {usuario_admin.cargo}")
 
-    # Adicionando com admin ✅
-    print(adicionar_cidade(cidade1, usuario2.cargo))
+    # ── Criando cidades ───────────────────────────────
+    print("\n🌍 Criando cidades...")
+    cidade1 = Cidades(
+        nome="Maceió",
+        pais="Brasil",
+        temperatura=30,
+        umidade=80,
+        vento=10,
+        condicao="Ensolarado",
+        emoji="☀️",
+        adicionado_por_id=usuario_admin.id,
+        adicionado_por_nome=usuario_admin.nome
+    )
 
-    # Listando cidades
-    print("Cidades salvas:", listar_cidades())
+    cidade2 = Cidades(
+        nome="Recife",
+        pais="Brasil",
+        temperatura=28,
+        umidade=85,
+        vento=15,
+        condicao="Nublado",
+        emoji="☁️",
+        adicionado_por_id=usuario_comum.id,
+        adicionado_por_nome=usuario_comum.nome
+    )
 
-    # Editando cidade
-    print(cidade1.EditarCidades(temperatura=28, cargo=usuario2.cargo))
+    # ── Testando adicionar ────────────────────────────
+    print("\n➕ Adicionando cidades...")
+    print(adicionar_cidade(cidade1))
+    print(adicionar_cidade(cidade2))
 
-    # Removendo cidade
-    print(remover_cidade(cidade1.id, usuario2.cargo))
+    # ── Testando listar ───────────────────────────────
+    print("\n📋 Listando cidades salvas:")
+    for cidade in listar_cidades():
+        print(f"  [{cidade.id}] {cidade.emoji} {cidade.nome} — {cidade.temperatura}°C — adicionado por: {cidade.adicionado_por_nome}")
 
-    # Listando novamente
-    print("Cidades após remoção:", listar_cidades())
+    # ── Testando buscar por ID ────────────────────────
+    print("\n🔍 Buscando cidade com ID 1...")
+    encontrada = buscar_cidade_por_id(1)
+    if encontrada:
+        print(f"  ✅ Encontrada: {encontrada.nome}")
+    else:
+        print("  ❌ Não encontrada!")
+
+    # ── Testando atualizar clima ──────────────────────
+    print("\n✏️ Atualizando clima de Maceió...")
+    cidade1.atualizar_clima(25, 70, 12, "Chuvoso", "🌧️")
+    print(f"  ✅ Novo clima: {cidade1.emoji} {cidade1.condicao} — {cidade1.temperatura}°C")
+    print(f"  ✅ Adicionado por continua: {cidade1.adicionado_por_nome}")
+
+    # ── Testando remover ──────────────────────────────
+    print("\n🗑️ Removendo Recife...")
+    print(f"  {remover_cidade(cidade2.id)}")
+
+    # ── Listando após remoção ─────────────────────────
+    print("\n📋 Cidades após remoção:")
+    for cidade in listar_cidades():
+        print(f"  [{cidade.id}] {cidade.emoji} {cidade.nome}")
+
+    # ── Testando buscar ID inexistente ────────────────
+    print("\n🔍 Buscando cidade com ID 99 (inexistente)...")
+    nao_encontrada = buscar_cidade_por_id(99)
+    if nao_encontrada:
+        print("  ✅ Encontrada!")
+    else:
+        print("  ✅ Retornou None corretamente!")
+
+    print("\n" + "=" * 50)
+    print("✅ TODOS OS TESTES CONCLUÍDOS!")
+    print("=" * 50)

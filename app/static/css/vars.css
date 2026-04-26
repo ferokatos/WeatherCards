@@ -1,0 +1,25 @@
+/* Design System Centralizado - Variáveis globais do WeatherCards */
+:root {
+    /* Paleta de Cores */
+    --primary-color: #3b82f6; /* Azul claro para ações principais */
+    --primary-dark: #2563eb; /* Azul escuro para hover */
+    --secondary-color: #1e293b; /* Cinza escuro/Azul para header */
+    --background-color: #f8fafc; /* Fundo principal */
+    --card-background: #ffffff; /* Fundo de cartões */
+    --text-main: #334155; /* Texto principal escuro */
+    --text-light: #64748b; /* Texto secundário e ícones */
+    --danger-color: #ef4444; /* Vermelho para botões de deletar/erros */
+    --danger-dark: #dc2626; /* Hover de vermelho */
+    --success-color: #10b981; /* Verde para sucessos/flash */
+
+    /* Tipografia e Tamanhos */
+    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}

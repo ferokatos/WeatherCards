@@ -292,4 +292,3 @@ def grafico(id):
     buf.seek(0)
 
     return send_file(buf, mimetype='image/png')
-

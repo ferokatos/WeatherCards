@@ -1,47 +1,80 @@
 {% extends "base.html" %}
+{% block titulo %}Dashboard{% endblock %}
 
 {% block conteudo %}
+
+    <!-- Cabeçalho do Dashboard -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
-        <h2>Dashboard Climático</h2>
-        <a href="{{ url_for('cidades.adicionar') }}" class="btn">Nova Cidade</a>
+        <div>
+            <h2>Dashboard Climático</h2>
+            <!-- Contador de cidades -->
+            <small style="color: var(--text-light);">
+                {{ cidades|length }} cidade(s) cadastrada(s)
+            </small>
+        </div>
+        {% if session.get('cargo') == 'admin' %}
+    <a href="{{ url_for('cidades.adicionar') }}" class="btn">➕ Nova Cidade</a>
+{% endif %}
     </div>
 
     {% if cidades %}
         <div class="grid-cidades">
             {% for cidade in cidades %}
+
+                <!-- Variáveis de permissão -->
+                {% set is_dono = session.get('usuario_id') == cidade.adicionado_por_id %}
+                {% set is_admin = session.get('cargo') == 'admin' %}
+
                 <div class="card-cidade">
-                    <h2>{{ cidade.nome }}, {{ cidade.pais }}</h2>
-                    <div class="emoji">{{ cidade.emoji }}</div>
+
+                    <!-- Cabeçalho do card -->
+                    <h2>{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h2>
+
+                    <!-- Temperatura em destaque -->
                     <div class="temperatura">{{ cidade.temperatura }}°C</div>
+
+                    <!-- Detalhes do clima -->
                     <div class="detalhes">
-                        {{ cidade.condicao }}<br>
-                        Umidade: {{ cidade.umidade }}% | Vento: {{ cidade.vento }}m/s<br>
-                        <small>Adicionado por: {{ cidade.adicionado_por_nome }}</small>
+                        <p>🌤️ {{ cidade.condicao }}</p>
+                        <p>💧 Umidade: {{ cidade.umidade }}%</p>
+                        <p>💨 Vento: {{ cidade.vento }} km/h</p>
                     </div>
-                    
+
+                    <!-- Rodapé do card -->
+                    <small style="color: var(--text-light);">
+                        Adicionado por: {{ cidade.adicionado_por_nome }}
+                    </small>
+
+                    <!-- Botões de ação -->
                     <div class="card-actions">
-                        <!-- Regras de Exibição dos Botões -->
-                        {% set is_dono = session.get('usuario_id') == cidade.adicionado_por_id %}
-                        {% set is_admin = session.get('cargo') == 'admin' %}
-                        
-                        {% if is_dono or is_admin %}
-                            <a href="{{ url_for('cidades.editar', id=cidade.id) }}" class="btn">Editar</a>
-                        {% endif %}
-                        
+                        {% if is_admin %}
+    <a href="{{ url_for('cidades.editar', id=cidade.id) }}" class="btn">✏️ Editar</a>
+{% endif %}
+
                         {% if is_admin %}
                             <form action="{{ url_for('cidades.deletar', id=cidade.id) }}" method="POST" style="display: inline;">
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja deletar {{ cidade.nome }}?');">
-                                    Excluir
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Tem certeza que deseja deletar {{ cidade.nome }}?');">
+                                    🗑️ Excluir
                                 </button>
                             </form>
                         {% endif %}
                     </div>
+
                 </div>
+
             {% endfor %}
         </div>
+
     {% else %}
-        <p style="text-align: center; color: var(--text-light); margin-top: 2rem;">
-            Nenhuma cidade cadastrada ainda. Seja o primeiro a adicionar!
-        </p>
+        <!-- Mensagem quando não tem cidades -->
+        <div style="text-align: center; margin-top: 3rem;">
+            <p style="font-size: 3rem;">🌍</p>
+            <p style="color: var(--text-light);">Nenhuma cidade cadastrada ainda.</p>
+            <a href="{{ url_for('cidades.adicionar') }}" class="btn" style="margin-top: 1rem;">
+                Adicionar primeira cidade
+            </a>
+        </div>
     {% endif %}
+
 {% endblock %}

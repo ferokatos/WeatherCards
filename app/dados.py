@@ -87,6 +87,42 @@ def remover_cidade(cidade_id):
 def listar_cidades():
     return CIDADES_SALVAS
 
+def popular_cidades_padrao():
+    """Busca e salva cidades padrão ao iniciar o app."""
+
+    # Evita duplicar se já foram carregadas
+    if CIDADES_SALVAS:
+        return
+
+    from app.services.weather import buscar_clima, WeatherServiceError
+
+    cidades_padrao = [
+        "Maceió", "São Paulo", "Rio de Janeiro",
+        "Fortaleza", "Recife", "Salvador",
+        "Manaus", "Curitiba", "Porto Alegre", "Brasília"
+    ]
+
+    for nome in cidades_padrao:
+        try:
+            dados = buscar_clima(nome)
+            cidade = Cidades(
+                nome=dados["nome"],
+                pais=dados["pais"],
+                temperatura=dados["temperatura"],
+                umidade=dados["umidade"],
+                vento=dados["vento"],
+                condicao=dados["condicao"],
+                emoji=dados["emoji"],
+                adicionado_por_id=0,           # 0 = sistema
+                adicionado_por_nome="Sistema"
+            )
+            CIDADES_SALVAS.append(cidade)
+            print(f"✅ {nome} carregada!")
+        except WeatherServiceError:
+            print(f"❌ Erro ao carregar {nome}")
+        except Exception as e:
+            print(f"❌ Erro inesperado em {nome}: {e}")
+
 if __name__ == "__main__":
     print("=" * 50)
     print("🧪 TESTANDO O SISTEMA")

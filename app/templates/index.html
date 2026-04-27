@@ -13,8 +13,8 @@
             </small>
         </div>
         {% if session.get('cargo') == 'admin' %}
-    <a href="{{ url_for('cidades.adicionar') }}" class="btn">➕ Nova Cidade</a>
-{% endif %}
+            <a href="{{ url_for('cidades.adicionar') }}" class="btn">➕ Nova Cidade</a>
+        {% endif %}
     </div>
 
     {% if cidades %}
@@ -25,42 +25,71 @@
                 {% set is_dono = session.get('usuario_id') == cidade.adicionado_por_id %}
                 {% set is_admin = session.get('cargo') == 'admin' %}
 
-                <div class="card-cidade">
+                <div class="card-cidade" id="card-{{ cidade.id }}">
+                    <div class="card-inner">
 
-                    <!-- Cabeçalho do card -->
-                    <h2>{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h2>
+                        <!-- FRENTE DO CARD -->
+                        <div class="card-frente">
 
-                    <!-- Temperatura em destaque -->
-                    <div class="temperatura">{{ cidade.temperatura }}°C</div>
-
-                    <!-- Detalhes do clima -->
-                    <div class="detalhes">
-                        <p>🌤️ {{ cidade.condicao }}</p>
-                        <p>💧 Umidade: {{ cidade.umidade }}%</p>
-                        <p>💨 Vento: {{ cidade.vento }} km/h</p>
-                    </div>
-
-                    <!-- Rodapé do card -->
-                    <small style="color: var(--text-light);">
-                        Adicionado por: {{ cidade.adicionado_por_nome }}
-                    </small>
-
-                    <!-- Botões de ação -->
-                    <div class="card-actions">
-                        {% if is_admin %}
-    <a href="{{ url_for('cidades.editar', id=cidade.id) }}" class="btn">✏️ Editar</a>
-{% endif %}
-
-                        {% if is_admin %}
-                            <form action="{{ url_for('cidades.deletar', id=cidade.id) }}" method="POST" style="display: inline;">
-                                <button type="submit" class="btn btn-danger"
-                                    onclick="return confirm('Tem certeza que deseja deletar {{ cidade.nome }}?');">
-                                    🗑️ Excluir
+                            <!-- Cabeçalho do card -->
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <h2>{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h2>
+                                <button class="btn-virar" onclick="virarCard('card-{{ cidade.id }}')" title="Ver gráfico">
+                                    📊
                                 </button>
-                            </form>
-                        {% endif %}
-                    </div>
+                            </div>
 
+                            <!-- Temperatura em destaque -->
+                            <div class="temperatura">{{ cidade.temperatura }}°C</div>
+
+                            <!-- Detalhes do clima -->
+                            <div class="detalhes">
+                                <p>🌤️ {{ cidade.condicao }}</p>
+                                <p>💧 Umidade: {{ cidade.umidade }}%</p>
+                                <p>💨 Vento: {{ cidade.vento }} km/h</p>
+                            </div>
+
+                            <!-- Rodapé do card -->
+                            <small style="color: var(--text-light);">
+                                Adicionado por: {{ cidade.adicionado_por_nome }}
+                            </small>
+
+                            <!-- Botões de ação -->
+                            <div class="card-actions">
+                                {% if is_admin %}
+                                    <a href="{{ url_for('cidades.editar', id=cidade.id) }}" class="btn">✏️ Editar</a>
+                                {% endif %}
+                                {% if is_admin %}
+                                    <form action="{{ url_for('cidades.deletar', id=cidade.id) }}" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger"
+                                            onclick="return confirm('Tem certeza que deseja deletar {{ cidade.nome }}?');">
+                                            🗑️ Excluir
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                        <!-- VERSO DO CARD (gráfico) -->
+                        <div class="card-verso">
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                                <h3>📈 Histórico — {{ cidade.nome }}</h3>
+                                <button class="btn-virar" onclick="virarCard('card-{{ cidade.id }}')" title="Voltar">
+                                    ✖
+                                </button>
+                            </div>
+
+                            <img
+                                class="grafico-img"
+                                data-src="{{ url_for('cidades.grafico', id=cidade.id) }}"
+                                alt="Gráfico de {{ cidade.nome }}"
+                            >
+
+                        </div>
+
+                    </div>
                 </div>
 
             {% endfor %}
@@ -76,5 +105,20 @@
             </a>
         </div>
     {% endif %}
+
+    <script>
+        function virarCard(id) {
+            const card = document.getElementById(id);
+            card.classList.toggle('virado');
+
+            // Carrega a imagem só quando o card virar
+            if (card.classList.contains('virado')) {
+                const img = card.querySelector('.grafico-img');
+                if (img && !img.src) {
+                    img.src = img.dataset.src;
+                }
+            }
+        }
+    </script>
 
 {% endblock %}

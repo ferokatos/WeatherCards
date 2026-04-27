@@ -1,6 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file, abort
 from app.dados import Cidades, CIDADES_SALVAS, buscar_cidade_por_id
 from app.services.weather import buscar_clima, WeatherServiceError
+import io
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')  # necessário para rodar sem interface gráfica no servidor
+import matplotlib.pyplot as plt
 
 cidades_bp = Blueprint("cidades", __name__)
 
@@ -14,7 +19,6 @@ def index():
     if not usuario_logado():
         return redirect(url_for("auth.login"))
     
-    # Renderiza o dashboard com a lista global de cidades
     return render_template("index.html", cidades=CIDADES_SALVAS)
 
 @cidades_bp.route("/cidade/adicionar", methods=["GET", "POST"])
@@ -26,10 +30,8 @@ def adicionar():
     if request.method == "POST":
         nome_cidade = request.form.get("cidade")
         try:
-            # Chama o serviço (SRP)
             dados_clima = buscar_clima(nome_cidade)
             
-            # Cria a entidade de dados associando a quem criou
             nova_cidade = Cidades(
                 nome=dados_clima["nome"],
                 pais=dados_clima["pais"],
@@ -41,7 +43,6 @@ def adicionar():
                 adicionado_por_id=session.get("usuario_id"),
                 adicionado_por_nome=session.get("usuario_nome")
             )
-            # Salva no Repositório
             CIDADES_SALVAS.append(nova_cidade)
             
             flash(f"Cidade {nova_cidade.nome} adicionada com sucesso!", "sucesso")
@@ -65,7 +66,6 @@ def editar(id):
         flash("Cidade não encontrada.", "erro")
         return redirect(url_for("cidades.index"))
         
-    # Validar Permissões de Edição (Somente o Dono ou Admin)
     is_dono = session.get("usuario_id") == cidade.adicionado_por_id
     is_admin = session.get("cargo") == "admin"
     
@@ -74,7 +74,6 @@ def editar(id):
         return redirect(url_for("cidades.index"))
 
     if request.method == "POST":
-        # Se clicar no botão Refresh da API
         if request.form.get("acao") == "refresh":
             try:
                 dados_clima = buscar_clima(cidade.nome)
@@ -88,12 +87,12 @@ def editar(id):
                 flash(f"Clima de {cidade.nome} atualizado pela API com sucesso!", "sucesso")
             except WeatherServiceError as e:
                 flash(f"Erro ao atualizar: {str(e)}", "erro")
-        # Se for preenchimento manual do formulário
         else:
             cidade.temperatura = float(request.form.get("temperatura", cidade.temperatura))
             cidade.umidade = int(request.form.get("umidade", cidade.umidade))
             cidade.vento = float(request.form.get("vento", cidade.vento))
             cidade.condicao = request.form.get("condicao", cidade.condicao)
+            cidade._registrar_historico()  # registra edição manual no histórico também
             flash("Dados da cidade modificados manualmente.", "sucesso")
             
         return redirect(url_for("cidades.index"))
@@ -115,3 +114,77 @@ def deletar(id):
         flash("Cidade não encontrada para exclusão.", "erro")
         
     return redirect(url_for("cidades.index"))
+
+@cidades_bp.route("/cidade/grafico/<int:id>")
+def grafico(id):
+    """Gera e retorna o gráfico de histórico climático da cidade como PNG."""
+    if not usuario_logado():
+        abort(403)
+
+    cidade = buscar_cidade_por_id(id)
+
+    if not cidade:
+        abort(404)
+
+    # Se ainda não tem histórico suficiente, simula os últimos 10 minutos
+    from datetime import datetime, timedelta
+    import random
+
+    historico = cidade.historico.copy()
+
+    if len(historico) < 2:
+        agora = datetime.now()
+        # Gera 6 pontos nos últimos 10 minutos com pequenas variações
+        for i in range(5, 0, -1):
+            momento = agora - timedelta(minutes=i * 2)
+            historico.insert(0, {
+                "data": momento,
+                "temperatura": round(cidade.temperatura + random.uniform(-1.5, 1.5), 1),
+                "umidade":     round(cidade.umidade     + random.uniform(-3, 3), 1),
+                "vento":       round(max(0, cidade.vento + random.uniform(-1, 1)), 1),
+            })
+
+    # Monta o DataFrame com o histórico (real ou simulado)
+    df = pd.DataFrame(historico)
+    df['data'] = pd.to_datetime(df['data'])
+    df = df.sort_values('data')
+
+    # Cria o gráfico
+    fig, ax1 = plt.subplots(figsize=(5, 3))
+    fig.patch.set_facecolor('#ffffff')
+    ax1.set_facecolor('#f8fafc')
+
+    cor_temp  = '#ef4444'
+    cor_umid  = '#3b82f6'
+    cor_vento = '#10b981'
+
+    datas = df['data'].dt.strftime('%d/%m %H:%M')
+
+    # Temperatura no eixo esquerdo
+    ax1.plot(datas, df['temperatura'], color=cor_temp, marker='o', linewidth=2, label='Temp (°C)', markersize=4)
+    ax1.set_ylabel('Temp (°C)', color=cor_temp, fontsize=8)
+    ax1.tick_params(axis='y', labelcolor=cor_temp)
+    ax1.tick_params(axis='x', labelsize=6, rotation=30)
+
+    # Umidade e Vento no eixo direito
+    ax2 = ax1.twinx()
+    ax2.plot(datas, df['umidade'],  color=cor_umid,  marker='s', linewidth=2, label='Umidade (%)',  markersize=4, linestyle='--')
+    ax2.plot(datas, df['vento'],    color=cor_vento, marker='^', linewidth=2, label='Vento (km/h)', markersize=4, linestyle=':')
+    ax2.set_ylabel('Umidade / Vento', fontsize=8)
+    ax2.tick_params(axis='y', labelsize=7)
+
+    # Legenda unificada
+    linhas1, labels1 = ax1.get_legend_handles_labels()
+    linhas2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(linhas1 + linhas2, labels1 + labels2, fontsize=7, loc='upper left')
+
+    ax1.set_title(f'Histórico — {cidade.nome}', fontsize=9, fontweight='bold', color='#0f172a')
+    fig.tight_layout()
+
+    # Converte para PNG em memória e retorna
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=110, bbox_inches='tight')
+    plt.close(fig)
+    buf.seek(0)
+
+    return send_file(buf, mimetype='image/png')

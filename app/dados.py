@@ -87,6 +87,7 @@ def remover_cidade(cidade_id):
 def listar_cidades():
     return CIDADES_SALVAS
 
+#Função que com o nome da cidade busca os dados na API
 def popular_cidades_padrao():
     """Busca e salva cidades padrão ao iniciar o app."""
 
@@ -123,6 +124,8 @@ def popular_cidades_padrao():
         except Exception as e:
             print(f"❌ Erro inesperado em {nome}: {e}")
 
+
+#!Teste local
 if __name__ == "__main__":
     print("=" * 50)
     print("🧪 TESTANDO O SISTEMA")

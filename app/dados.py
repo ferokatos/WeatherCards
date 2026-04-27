@@ -46,7 +46,21 @@ class Cidades:
         self.adicionado_por_nome = adicionado_por_nome
         self.id = Cidades.ID_atual
         Cidades.ID_atual += 1
-    
+
+        # Histórico de leituras climáticas para o gráfico
+        self.historico = []
+        self._registrar_historico()
+
+    def _registrar_historico(self):
+        """Registra a leitura atual no histórico."""
+        from datetime import datetime
+        self.historico.append({
+            "data": datetime.now(),
+            "temperatura": self.temperatura,
+            "umidade": self.umidade,
+            "vento": self.vento,
+        })
+
     def atualizar_clima(self, temperatura:float, umidade:float, vento:float, condicao:str, emoji:str):
         """Atualiza os dados de clima da cidade mantendo quem adicionou intacto"""
         self.temperatura = temperatura
@@ -54,6 +68,7 @@ class Cidades:
         self.vento = vento
         self.condicao = condicao
         self.emoji = emoji
+        self._registrar_historico()  # registra cada atualização no histórico
 
 def buscar_cidade_por_id(cidade_id):
     """Busca uma cidade salva pelo ID"""
@@ -188,6 +203,7 @@ if __name__ == "__main__":
     cidade1.atualizar_clima(25, 70, 12, "Chuvoso", "🌧️")
     print(f"  ✅ Novo clima: {cidade1.emoji} {cidade1.condicao} — {cidade1.temperatura}°C")
     print(f"  ✅ Adicionado por continua: {cidade1.adicionado_por_nome}")
+    print(f"  ✅ Histórico tem {len(cidade1.historico)} registros")
 
     # ── Testando remover ──────────────────────────────
     print("\n🗑️ Removendo Recife...")

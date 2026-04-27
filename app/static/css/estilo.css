@@ -58,8 +58,6 @@ body {
 .navbar .nav-links a.btn-sair {
     background-color: var(--primary-color);
     color: white;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius-sm);
 }
 
 .navbar .nav-links a.btn-sair:hover {
@@ -95,7 +93,7 @@ body {
     border: 1px solid #6ee7b7;
 }
 
-/* ── Formulários (Login / Cadastro) ── */
+/* ── Formulários ── */
 .form-container {
     background: var(--card-background);
     padding: var(--spacing-2xl);
@@ -247,66 +245,95 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: var(--spacing-lg);
     margin-top: var(--spacing-lg);
+    align-items: start;
 }
 
-/* ── Card de Cidade ── */
+/* ── Card Flip ── */
 .card-cidade {
-    background: var(--card-background);
     border-radius: var(--border-radius-lg);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-color);
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
+    transition: box-shadow 0.2s;
 }
 
 .card-cidade:hover {
-    transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
 }
 
-.card-cidade-header {
+/* frente visível por padrão, verso escondido */
+.card-frente {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-md);
+    flex-direction: column;
+    background: var(--card-background);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-lg);
+}
+
+.card-verso {
+    display: none;
+    flex-direction: column;
+    background: var(--card-background);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-lg);
+    min-height: 300px;
+}
+
+/* quando virado: esconde frente, mostra verso */
+.card-cidade.virado .card-frente {
+    display: none;
+}
+
+.card-cidade.virado .card-verso {
+    display: flex;
+}
+
+.card-verso h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: var(--spacing-sm);
+}
+
+.card-verso .grafico-img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.card-verso .grafico-erro {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-align: center;
 }
 
 .card-cidade h2 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-main);
-    letter-spacing: -0.01em;
-}
-
-.card-cidade .emoji {
-    font-size: 3.5rem;
-    display: block;
-    text-align: center;
-    margin: var(--spacing-sm) 0;
 }
 
 .card-cidade .temperatura {
     font-size: 2.75rem;
     font-weight: 700;
     color: var(--text-main);
-    text-align: center;
     letter-spacing: -0.03em;
     line-height: 1.1;
+    margin: var(--spacing-sm) 0;
 }
 
 .card-cidade .detalhes {
     color: var(--text-light);
-    margin: var(--spacing-md) 0;
+    margin: var(--spacing-sm) 0;
     font-size: 0.875rem;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
-}
-
-.card-cidade .detalhes span {
-    display: flex;
-    align-items: center;
     gap: var(--spacing-xs);
 }
 
@@ -321,9 +348,29 @@ body {
 .card-actions .btn {
     flex: 1;
     width: auto;
+    margin-top: 0;
 }
 
-/* ── Favorito (estrela) ── */
+/* ── Botão virar ── */
+.btn-virar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-muted);
+    padding: 2px 6px;
+    border-radius: var(--border-radius-sm);
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.btn-virar:hover {
+    color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+/* ── Favorito ── */
 .btn-favorito {
     background: none;
     border: none;
@@ -376,4 +423,13 @@ tr:last-child td {
 
 tr:hover td {
     background-color: #f8fafc;
+}
+
+/* ── Gráfico ── */
+.grafico-img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius-sm);
+    margin-top: var(--spacing-sm);
+    display: block;
 }

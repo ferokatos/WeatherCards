@@ -1,25 +1,47 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Cadastro</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block titulo %}Cadastro{% endblock %}
 
-<h1>Cadastro</h1>
+{% block conteudo %}
+<div style="max-width: 400px; margin: 5rem auto;">
+    <h2 style="text-align: center;">📝 Cadastro</h2>
 
-<form method="POST">
-    <input name="nome" placeholder="Nome"><br><br>
-    <input name="email" placeholder="Email"><br><br>
-    <input name="senha" placeholder="Senha"><br><br>
-    <input name="confirmacao_senha" placeholder="Confirmar senha"><br><br>
+    <form method="POST" action="{{ url_for('auth.cadastro') }}">
 
-    <select name="tipo_usuario">
-        <option value="padrão">Padrão</option>
-        <option value="admin">Admin</option>
-    </select><br><br>
+        <div>
+            <label>Nome</label>
+            <input type="text" name="nome" placeholder="Seu nome" required>
+        </div>
 
-    <button type="submit">Cadastrar</button>
-</form>
+        <div>
+            <label>Email</label>
+            <input type="email" name="email" placeholder="seu@email.com" required>
+        </div>
 
-</body>
-</html>
+        <div>
+            <label>Senha</label>
+            <input type="password" name="senha" placeholder="mínimo 8 caracteres" required>
+        </div>
+
+        <div>
+            <label>Confirmar Senha</label>
+            <input type="password" name="confirmacao_senha" placeholder="repita a senha" required>
+        </div>
+
+        <div>
+            <label>Tipo de usuário</label>
+            <select name="tipo_usuario">
+                <option value="padrão">Padrão</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn">Cadastrar</button>
+
+    </form>
+
+    <p style="text-align: center; margin-top: 1rem;">
+        Já tem conta? 
+        <a href="{{ url_for('auth.login') }}">Faça login</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,25 +1,40 @@
 /* Design System Centralizado - Variáveis globais do WeatherCards */
 :root {
     /* Paleta de Cores */
-    --primary-color: #3b82f6; /* Azul claro para ações principais */
-    --primary-dark: #2563eb; /* Azul escuro para hover */
-    --secondary-color: #1e293b; /* Cinza escuro/Azul para header */
-    --background-color: #f8fafc; /* Fundo principal */
-    --card-background: #ffffff; /* Fundo de cartões */
-    --text-main: #334155; /* Texto principal escuro */
-    --text-light: #64748b; /* Texto secundário e ícones */
-    --danger-color: #ef4444; /* Vermelho para botões de deletar/erros */
-    --danger-dark: #dc2626; /* Hover de vermelho */
-    --success-color: #10b981; /* Verde para sucessos/flash */
+    --primary-color: #3b82f6;
+    --primary-dark: #2563eb;
+    --secondary-color: #1e293b;
+    --background-color: #f1f5f9;
+    --card-background: #ffffff;
+    --text-main: #0f172a;
+    --text-light: #64748b;
+    --text-muted: #94a3b8;
+    --danger-color: #ef4444;
+    --danger-dark: #dc2626;
+    --success-color: #10b981;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --input-background: #f8fafc;
 
-    /* Tipografia e Tamanhos */
-    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Tipografia */
+    --font-main: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* Espaçamentos */
+    --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
-    --border-radius-sm: 4px;
-    --border-radius-md: 8px;
-    --border-radius-lg: 12px;
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --spacing-2xl: 3rem;
+
+    /* Bordas */
+    --border-radius-sm: 8px;
+    --border-radius-md: 10px;
+    --border-radius-lg: 16px;
+    --border-radius-xl: 20px;
+    --border-radius-full: 9999px;
+
+    /* Sombras */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
 }

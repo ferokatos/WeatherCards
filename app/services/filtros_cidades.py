@@ -35,9 +35,9 @@ def filtrar_cidades(cidades, filtro_temperatura="todas", filtro_condicao="todas"
             if obter_grupo_condicao(cidade) == filtro_condicao
         ]
 
-    if filtro_temperatura == "mais-frias":
+    if filtro_temperatura == "mais-quentes":
         cidades_filtradas.sort(key=FILTROS_TEMPERATURA[filtro_temperatura])
-    elif filtro_temperatura == "mais-quentes":
+    elif filtro_temperatura == "mais-frias":
         cidades_filtradas.sort(
             key=FILTROS_TEMPERATURA[filtro_temperatura],
             reverse=True,

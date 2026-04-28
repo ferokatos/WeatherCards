@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file, abort
 from app.dados import Cidades, CIDADES_SALVAS, buscar_cidade_por_id
-from app.services.weather import buscar_clima, WeatherServiceError
+from app.services.filtros_cidades import FILTRO_CONDICAO_OPCOES, filtrar_cidades
+from app.services.weather import buscar_clima, WeatherServiceError, normalizar_grupo_condicao
 import io
 import pandas as pd
 import matplotlib
@@ -9,17 +10,54 @@ import matplotlib.pyplot as plt
 
 cidades_bp = Blueprint("cidades", __name__)
 
+FILTRO_TEMPERATURA_OPCOES = [
+    ("todas", "Todas as temperaturas"),
+    ("mais-frias", "Mais frias"),
+    ("mais-quentes", "Mais quentes"),
+]
+
 def usuario_logado():
     """Retorna o ID do usuário logado ou None"""
     return session.get("usuario_id")
+
+
+def atualizar_cidade_com_dados_api(cidade):
+    """Centraliza a atualizacao de uma cidade via OpenWeather."""
+    dados_clima = buscar_clima(cidade.nome)
+    cidade.atualizar_clima(
+        temperatura=dados_clima["temperatura"],
+        temp_min=dados_clima["temp_min"],
+        temp_max=dados_clima["temp_max"],
+        umidade=dados_clima["umidade"],
+        vento=dados_clima["vento"],
+        condicao=dados_clima["condicao"],
+        grupo_condicao=dados_clima["grupo_condicao"],
+        emoji=dados_clima["emoji"]
+    )
 
 @cidades_bp.route("/")
 def index():
     """Lista todas as cidades salvas no Dashboard"""
     if not usuario_logado():
         return redirect(url_for("auth.login"))
-    
-    return render_template("index.html", cidades=CIDADES_SALVAS)
+
+    # A rota apenas coordena os filtros solicitados.
+    filtro_temperatura = request.args.get("temperatura", "todas")
+    filtro_condicao = request.args.get("condicao", "todas")
+    cidades_filtradas = filtrar_cidades(
+        CIDADES_SALVAS,
+        filtro_temperatura=filtro_temperatura,
+        filtro_condicao=filtro_condicao,
+    )
+
+    return render_template(
+        "index.html",
+        cidades=cidades_filtradas,
+        filtro_temperatura=filtro_temperatura,
+        filtro_condicao=filtro_condicao,
+        filtros_temperatura=FILTRO_TEMPERATURA_OPCOES,
+        filtros_condicao=FILTRO_CONDICAO_OPCOES,
+    )
 
 @cidades_bp.route("/cidade/adicionar", methods=["GET", "POST"])
 def adicionar():
@@ -36,9 +74,12 @@ def adicionar():
                 nome=dados_clima["nome"],
                 pais=dados_clima["pais"],
                 temperatura=dados_clima["temperatura"],
+                temp_min=dados_clima["temp_min"],
+                temp_max=dados_clima["temp_max"],
                 umidade=dados_clima["umidade"],
                 vento=dados_clima["vento"],
                 condicao=dados_clima["condicao"],
+                grupo_condicao=dados_clima["grupo_condicao"],
                 emoji=dados_clima["emoji"],
                 adicionado_por_id=session.get("usuario_id"),
                 adicionado_por_nome=session.get("usuario_nome")
@@ -54,6 +95,35 @@ def adicionar():
             flash(str(e), "erro")
             
     return render_template("adicionar.html")
+
+
+@cidades_bp.route("/cidades/refresh", methods=["POST"])
+def refresh_cidades():
+    """Atualiza as cidades salvas pela API e mantém o contexto do dashboard."""
+    if not usuario_logado():
+        flash("Faça login para atualizar as cidades.", "erro")
+        return redirect(url_for("cidades.index"))
+
+    atualizadas = 0
+    falhas = 0
+
+    for cidade in CIDADES_SALVAS:
+        try:
+            atualizar_cidade_com_dados_api(cidade)
+            atualizadas += 1
+        except WeatherServiceError:
+            falhas += 1
+
+    if atualizadas:
+        flash(f"{atualizadas} cidade(s) atualizada(s) pela API.", "sucesso")
+    if falhas:
+        flash(f"{falhas} cidade(s) não puderam ser atualizadas.", "erro")
+
+    return redirect(url_for(
+        "cidades.index",
+        temperatura=request.form.get("temperatura", "todas"),
+        condicao=request.form.get("condicao", "todas"),
+    ))
 
 @cidades_bp.route("/cidade/editar/<int:id>", methods=["GET", "POST"])
 def editar(id):
@@ -76,22 +146,18 @@ def editar(id):
     if request.method == "POST":
         if request.form.get("acao") == "refresh":
             try:
-                dados_clima = buscar_clima(cidade.nome)
-                cidade.atualizar_clima(
-                    temperatura=dados_clima["temperatura"],
-                    umidade=dados_clima["umidade"],
-                    vento=dados_clima["vento"],
-                    condicao=dados_clima["condicao"],
-                    emoji=dados_clima["emoji"]
-                )
+                atualizar_cidade_com_dados_api(cidade)
                 flash(f"Clima de {cidade.nome} atualizado pela API com sucesso!", "sucesso")
             except WeatherServiceError as e:
                 flash(f"Erro ao atualizar: {str(e)}", "erro")
         else:
             cidade.temperatura = float(request.form.get("temperatura", cidade.temperatura))
+            cidade.temp_min = float(request.form.get("temp_min", cidade.temp_min or cidade.temperatura))
+            cidade.temp_max = float(request.form.get("temp_max", cidade.temp_max or cidade.temperatura))
             cidade.umidade = int(request.form.get("umidade", cidade.umidade))
             cidade.vento = float(request.form.get("vento", cidade.vento))
             cidade.condicao = request.form.get("condicao", cidade.condicao)
+            cidade.grupo_condicao = normalizar_grupo_condicao(cidade.condicao)
             cidade._registrar_historico()  # registra edição manual no histórico também
             flash("Dados da cidade modificados manualmente.", "sucesso")
             

@@ -34,13 +34,16 @@ class UsuarioAdmin(Usuario_padrao):
 #? Classe de cidades irá receber os dados da API, criando assim um flash_card
 class Cidades:
     ID_atual = 1
-    def __init__(self, nome:str, pais:str, temperatura:float, umidade:float, vento:float, condicao:str, emoji:str, adicionado_por_id:int, adicionado_por_nome:str):
+    def __init__(self, nome:str, pais:str, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str, adicionado_por_id:int, adicionado_por_nome:str):
         self.nome = nome
         self.pais = pais
         self.temperatura = temperatura
+        self.temp_min = temp_min
+        self.temp_max = temp_max
         self.umidade = umidade
         self.vento = vento
         self.condicao = condicao
+        self.grupo_condicao = grupo_condicao
         self.emoji = emoji
         self.adicionado_por_id = adicionado_por_id
         self.adicionado_por_nome = adicionado_por_nome
@@ -57,16 +60,21 @@ class Cidades:
         self.historico.append({
             "data": datetime.now(),
             "temperatura": self.temperatura,
+            "temp_min": self.temp_min,
+            "temp_max": self.temp_max,
             "umidade": self.umidade,
             "vento": self.vento,
         })
 
-    def atualizar_clima(self, temperatura:float, umidade:float, vento:float, condicao:str, emoji:str):
+    def atualizar_clima(self, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str):
         """Atualiza os dados de clima da cidade mantendo quem adicionou intacto"""
         self.temperatura = temperatura
+        self.temp_min = temp_min
+        self.temp_max = temp_max
         self.umidade = umidade
         self.vento = vento
         self.condicao = condicao
+        self.grupo_condicao = grupo_condicao
         self.emoji = emoji
         self._registrar_historico()  # registra cada atualização no histórico
 
@@ -112,10 +120,11 @@ def popular_cidades_padrao():
 
     from app.services.weather import buscar_clima, WeatherServiceError
 
+    # Espalha as cidades por faixas climaticas diferentes.
     cidades_padrao = [
-        "Maceió", "São Paulo", "Rio de Janeiro",
-        "Fortaleza", "Recife", "Salvador",
-        "Manaus", "Curitiba", "Porto Alegre", "Brasília"
+        "Maceió,BR", "Manaus,BR", "Curitiba,BR",
+        "Porto Alegre,BR", "Londres,GB","Nuuk,GL", "Reykjavik,IS",
+        "Moscou,RU", "Cairo,EG", "Tokyo,JP", "Vancouver,CA"
     ]
 
     for nome in cidades_padrao:
@@ -125,9 +134,12 @@ def popular_cidades_padrao():
                 nome=dados["nome"],
                 pais=dados["pais"],
                 temperatura=dados["temperatura"],
+                temp_min=dados["temp_min"],
+                temp_max=dados["temp_max"],
                 umidade=dados["umidade"],
                 vento=dados["vento"],
                 condicao=dados["condicao"],
+                grupo_condicao=dados["grupo_condicao"],
                 emoji=dados["emoji"],
                 adicionado_por_id=0,           # 0 = sistema
                 adicionado_por_nome="Sistema"
@@ -160,9 +172,12 @@ if __name__ == "__main__":
         nome="Maceió",
         pais="Brasil",
         temperatura=30,
+        temp_min=28,
+        temp_max=31,
         umidade=80,
         vento=10,
         condicao="Ensolarado",
+        grupo_condicao="ceu-limpo",
         emoji="☀️",
         adicionado_por_id=usuario_admin.id,
         adicionado_por_nome=usuario_admin.nome
@@ -172,9 +187,12 @@ if __name__ == "__main__":
         nome="Recife",
         pais="Brasil",
         temperatura=28,
+        temp_min=26,
+        temp_max=29,
         umidade=85,
         vento=15,
         condicao="Nublado",
+        grupo_condicao="nublado",
         emoji="☁️",
         adicionado_por_id=usuario_comum.id,
         adicionado_por_nome=usuario_comum.nome
@@ -200,7 +218,7 @@ if __name__ == "__main__":
 
     # ── Testando atualizar clima ──────────────────────
     print("\n✏️ Atualizando clima de Maceió...")
-    cidade1.atualizar_clima(25, 70, 12, "Chuvoso", "🌧️")
+    cidade1.atualizar_clima(25, 23, 27, 70, 12, "Chuvoso", "outros", "🌧️")
     print(f"  ✅ Novo clima: {cidade1.emoji} {cidade1.condicao} — {cidade1.temperatura}°C")
     print(f"  ✅ Adicionado por continua: {cidade1.adicionado_por_nome}")
     print(f"  ✅ Histórico tem {len(cidade1.historico)} registros")

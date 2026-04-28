@@ -67,6 +67,46 @@ body {
     width: 100%;
     margin: var(--spacing-2xl) auto;
 }
+/* ── FORM GROUP (caixinhas do formulário) ── */
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+/* Inputs e selects bonitos */
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.65rem var(--spacing-md); /* espaço interno */
+    border: 1px solid var(--border-color); /* borda suave */
+    border-radius: var(--border-radius-sm); /* cantos arredondados */
+    font-family: inherit;
+    font-size: 0.95rem;
+    background-color: var(--input-background);
+    color: var(--text-main);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none; /* remove contorno padrão feio */
+}
+
+/* Placeholder (texto dentro da caixa) */
+.form-group input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Efeito quando clica na caixa */
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* brilho azul leve */
+    background-color: white;
+}
 
 /* ── BOTÕES (Ajuste Definitivo de Altura) ── */
 .btn {

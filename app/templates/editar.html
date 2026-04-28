@@ -25,6 +25,17 @@
                 <label for="temperatura">Temperatura (°C)</label>
                 <input type="number" step="0.1" id="temperatura" name="temperatura" value="{{ cidade.temperatura }}" required>
             </div>
+
+            <!-- Mantém a faixa térmica editável junto da leitura atual. -->
+            <div class="form-group">
+                <label for="temp_min">Temperatura mínima (°C)</label>
+                <input type="number" step="0.1" id="temp_min" name="temp_min" value="{{ cidade.temp_min if cidade.temp_min is not none else cidade.temperatura }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="temp_max">Temperatura máxima (°C)</label>
+                <input type="number" step="0.1" id="temp_max" name="temp_max" value="{{ cidade.temp_max if cidade.temp_max is not none else cidade.temperatura }}" required>
+            </div>
             
             <div class="form-group">
                 <label for="umidade">Umidade (%)</label>

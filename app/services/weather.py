@@ -13,6 +13,34 @@ BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 DEFAULT_UNITS = "metric"
 DEFAULT_LANG = "pt_br"
 
+# Mapeia as descricoes oficiais do OpenWeather para grupos internos.
+OPENWEATHER_GROUPS = {
+    "clear sky": "ceu-limpo",
+    "few clouds": "nublado",
+    "scattered clouds": "nublado",
+    "broken clouds": "nublado",
+    "cloud": "nublado",
+    "shower rain": "chuva",
+    "rain": "chuva",
+    "thunderstorm": "tempestade",
+    "snow": "neve",
+    "mist": "nevoa",
+}
+
+# Garante emoji consistente para as descricoes canonicas da API.
+OPENWEATHER_EMOJIS = {
+    "clear sky": "☀️",
+    "few clouds": "🌤️",
+    "scattered clouds": "🌤️",
+    "broken clouds": "☁️",
+    "cloud": "☁️",
+    "shower rain": "🌧️",
+    "rain": "🌧️",
+    "thunderstorm": "⛈️",
+    "snow": "❄️",
+    "mist": "🌫️",
+}
+
 
 class WeatherServiceError(Exception):
     """Erro genérico do serviço de clima."""
@@ -67,23 +95,57 @@ def buscar_clima(cidade):
     data = response.json()
     weather_list = data.get("weather") or []
     weather_info = weather_list[0] if weather_list else {}
+    main_data = data.get("main", {})
 
-    temperatura = data.get("main", {}).get("temp")
-    umidade = data.get("main", {}).get("humidity")
+    temperatura = main_data.get("temp")
+    temp_min = main_data.get("temp_min")
+    temp_max = main_data.get("temp_max")
+    umidade = main_data.get("humidity")
     vento = data.get("wind", {}).get("speed")
     condicao = weather_info.get("description") or "" 
     nome = data.get("name") or cidade
     pais = data.get("sys", {}).get("country") or ""
+    grupo_condicao = normalizar_grupo_condicao(condicao)
 
     return {
         "nome": nome,
         "pais": pais,
         "temperatura": round(temperatura, 1) if isinstance(temperatura, (int, float)) else None,
+        "temp_min": round(temp_min, 1) if isinstance(temp_min, (int, float)) else None,
+        "temp_max": round(temp_max, 1) if isinstance(temp_max, (int, float)) else None,
         "umidade": int(umidade) if isinstance(umidade, (int, float)) else None,
         "vento": round(vento, 1) if isinstance(vento, (int, float)) else None,
         "condicao": condicao.capitalize(),
+        "grupo_condicao": grupo_condicao,
         "emoji": get_emoji(condicao),
     }
+
+
+def normalizar_grupo_condicao(condicao):
+    """Agrupa descricoes similares para filtros previsiveis."""
+    if not condicao:
+        return "outros"
+
+    text = condicao.strip().lower()
+
+    if text in OPENWEATHER_GROUPS:
+        return OPENWEATHER_GROUPS[text]
+
+    # Mantem o filtro resiliente a variacoes da API.
+    if any(k in text for k in ["storm", "thunder", "tempestade", "trovoada", "raio"]):
+        return "tempestade"
+    if any(k in text for k in ["snow", "neve", "sleet", "ice", "gelo"]):
+        return "neve"
+    if any(k in text for k in ["rain", "chuva", "drizzle", "chuvisco", "garoa", "shower"]):
+        return "chuva"
+    if any(k in text for k in ["mist", "fog", "haze", "névoa", "nevoa", "neblina"]):
+        return "nevoa"
+    if any(k in text for k in ["clear", "sunny", "limpo", "ensolarado", "sol"]):
+        return "ceu-limpo"
+    if any(k in text for k in ["cloud", "nublado", "overcast", "nuvens", "few", "scattered", "broken", "parcial", "dispersas"]):
+        return "nublado"
+
+    return "outros"
 
 
 def get_emoji(condicao):
@@ -91,7 +153,10 @@ def get_emoji(condicao):
     if not condicao:
         return "❔"
 
-    text = condicao.lower()
+    text = condicao.strip().lower()
+
+    if text in OPENWEATHER_EMOJIS:
+        return OPENWEATHER_EMOJIS[text]
 
     # 1. Condições Extremas (Prioridade Máxima)
     if "tornado" in text:

@@ -1,7 +1,7 @@
 #Aqui ficarão os dados locais(cache local) para o projeto, como por exemplo os usuários e as cidades, além de métodos para editar as cidades.
 
 #!--------------------------------------------------------------------------------
-#!                                  USUÁRIO PADRÃO
+#!                                   USUÁRIO PADRÃO
 #!--------------------------------------------------------------------------------
 
 #? Classe usuário padrão poderá apenas vizualisar as cidades, não poderá criar, deletar ou editar cidades.
@@ -18,7 +18,7 @@ class Usuario_padrao:
         Usuario_padrao.USUARIOS.append(self)
 
 #!--------------------------------------------------------------------------------
-#!                                  USUÁRIO ADMIN
+#!                                   USUÁRIO ADMIN
 #!--------------------------------------------------------------------------------
 
 #? Classe usuário admin além de vizualisar as cidades, poderá criar, editar e deletar cidades
@@ -28,32 +28,55 @@ class UsuarioAdmin(Usuario_padrao):
         self.cargo = "admin"
 
 #!--------------------------------------------------------------------------------
-#!                            CIDADES(descrições)
+#!                              CIDADES(descrições)
 #!--------------------------------------------------------------------------------
 
 #? Classe de cidades irá receber os dados da API, criando assim um flash_card
 class Cidades:
     ID_atual = 1
-    def __init__(self, nome:str, pais:str, temperatura:float, umidade:float, vento:float, condicao:str, emoji:str, adicionado_por_id:int, adicionado_por_nome:str):
+    def __init__(self, nome:str, pais:str, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str, adicionado_por_id:int, adicionado_por_nome:str):
         self.nome = nome
         self.pais = pais
         self.temperatura = temperatura
+        self.temp_min = temp_min
+        self.temp_max = temp_max
         self.umidade = umidade
         self.vento = vento
         self.condicao = condicao
+        self.grupo_condicao = grupo_condicao
         self.emoji = emoji
         self.adicionado_por_id = adicionado_por_id
         self.adicionado_por_nome = adicionado_por_nome
         self.id = Cidades.ID_atual
         Cidades.ID_atual += 1
-    
-    def atualizar_clima(self, temperatura:float, umidade:float, vento:float, condicao:str, emoji:str):
+
+        # Histórico de leituras climáticas para o gráfico
+        self.historico = []
+        self._registrar_historico()
+
+    def _registrar_historico(self):
+        """Registra a leitura atual no histórico."""
+        from datetime import datetime
+        self.historico.append({
+            "data": datetime.now(),
+            "temperatura": self.temperatura,
+            "temp_min": self.temp_min,
+            "temp_max": self.temp_max,
+            "umidade": self.umidade,
+            "vento": self.vento,
+        })
+
+    def atualizar_clima(self, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str):
         """Atualiza os dados de clima da cidade mantendo quem adicionou intacto"""
         self.temperatura = temperatura
+        self.temp_min = temp_min
+        self.temp_max = temp_max
         self.umidade = umidade
         self.vento = vento
         self.condicao = condicao
+        self.grupo_condicao = grupo_condicao
         self.emoji = emoji
+        self._registrar_historico()  # registra cada atualização no histórico
 
 def buscar_cidade_por_id(cidade_id):
     """Busca uma cidade salva pelo ID"""
@@ -63,7 +86,7 @@ def buscar_cidade_por_id(cidade_id):
     return None
 
 #!--------------------------------------------------------------------------------
-#!                      REPOSITÓRIO GLOBAL DE CIDADES
+#!                       REPOSITÓRIO GLOBAL DE CIDADES
 #!--------------------------------------------------------------------------------
 
 #Lista global de cidades, onde todas as cidades serão armazenaddas.
@@ -83,10 +106,11 @@ def remover_cidade(cidade_id):
 
     return "Cidade não encontrada."
 
-# Função que irá listar todas as cidades salvas
+# Função que irá listar todas as cidades salvas (Ordenadas do mais novo para o mais antigo)
 def listar_cidades():
-    return CIDADES_SALVAS
+    return CIDADES_SALVAS[::-1]
 
+#Função que com o nome da cidade busca os dados na API
 def popular_cidades_padrao():
     """Busca e salva cidades padrão ao iniciar o app."""
 
@@ -96,10 +120,11 @@ def popular_cidades_padrao():
 
     from app.services.weather import buscar_clima, WeatherServiceError
 
+    # Espalha as cidades por faixas climaticas diferentes.
     cidades_padrao = [
-        "Maceió", "São Paulo", "Rio de Janeiro",
-        "Fortaleza", "Recife", "Salvador",
-        "Manaus", "Curitiba", "Porto Alegre", "Brasília"
+        "Maceió,BR", "Manaus,BR", "Curitiba,BR",
+        "Porto Alegre,BR", "Londres,GB","Nuuk,GL", "Reykjavik,IS",
+        "Moscou,RU", "Cairo,EG", "Tokyo,JP", "Vancouver,CA"
     ]
 
     for nome in cidades_padrao:
@@ -109,9 +134,12 @@ def popular_cidades_padrao():
                 nome=dados["nome"],
                 pais=dados["pais"],
                 temperatura=dados["temperatura"],
+                temp_min=dados["temp_min"],
+                temp_max=dados["temp_max"],
                 umidade=dados["umidade"],
                 vento=dados["vento"],
                 condicao=dados["condicao"],
+                grupo_condicao=dados["grupo_condicao"],
                 emoji=dados["emoji"],
                 adicionado_por_id=0,           # 0 = sistema
                 adicionado_por_nome="Sistema"
@@ -123,6 +151,8 @@ def popular_cidades_padrao():
         except Exception as e:
             print(f"❌ Erro inesperado em {nome}: {e}")
 
+
+#!Teste local
 if __name__ == "__main__":
     print("=" * 50)
     print("🧪 TESTANDO O SISTEMA")
@@ -142,9 +172,12 @@ if __name__ == "__main__":
         nome="Maceió",
         pais="Brasil",
         temperatura=30,
+        temp_min=28,
+        temp_max=31,
         umidade=80,
         vento=10,
         condicao="Ensolarado",
+        grupo_condicao="ceu-limpo",
         emoji="☀️",
         adicionado_por_id=usuario_admin.id,
         adicionado_por_nome=usuario_admin.nome
@@ -154,9 +187,12 @@ if __name__ == "__main__":
         nome="Recife",
         pais="Brasil",
         temperatura=28,
+        temp_min=26,
+        temp_max=29,
         umidade=85,
         vento=15,
         condicao="Nublado",
+        grupo_condicao="nublado",
         emoji="☁️",
         adicionado_por_id=usuario_comum.id,
         adicionado_por_nome=usuario_comum.nome
@@ -168,7 +204,7 @@ if __name__ == "__main__":
     print(adicionar_cidade(cidade2))
 
     # ── Testando listar ───────────────────────────────
-    print("\n📋 Listando cidades salvas:")
+    print("\n📋 Listando cidades salvas (Deve mostrar a mais nova primeiro):")
     for cidade in listar_cidades():
         print(f"  [{cidade.id}] {cidade.emoji} {cidade.nome} — {cidade.temperatura}°C — adicionado por: {cidade.adicionado_por_nome}")
 
@@ -182,9 +218,10 @@ if __name__ == "__main__":
 
     # ── Testando atualizar clima ──────────────────────
     print("\n✏️ Atualizando clima de Maceió...")
-    cidade1.atualizar_clima(25, 70, 12, "Chuvoso", "🌧️")
+    cidade1.atualizar_clima(25, 23, 27, 70, 12, "Chuvoso", "outros", "🌧️")
     print(f"  ✅ Novo clima: {cidade1.emoji} {cidade1.condicao} — {cidade1.temperatura}°C")
     print(f"  ✅ Adicionado por continua: {cidade1.adicionado_por_nome}")
+    print(f"  ✅ Histórico tem {len(cidade1.historico)} registros")
 
     # ── Testando remover ──────────────────────────────
     print("\n🗑️ Removendo Recife...")

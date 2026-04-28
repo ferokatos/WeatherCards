@@ -248,6 +248,78 @@ body {
     align-items: start;
 }
 
+.filtros-dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    align-items: end;
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.form-filtros-dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    align-items: end;
+    flex: 1;
+}
+
+.filtro-bloco {
+    min-width: 220px;
+    flex: 1;
+}
+
+.filtros-acoes {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: end;
+    margin-left: auto;
+}
+
+.form-refresh-dashboard {
+    display: flex;
+}
+
+.filtro-bloco label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-light);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.filtro-bloco select {
+    width: 100%;
+    padding: 0.65rem var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--input-background);
+    color: var(--text-main);
+    font: inherit;
+}
+
+.btn-filtro-limpar {
+    width: auto;
+    margin-top: 0;
+    white-space: nowrap;
+}
+
+.btn-refresh-dashboard {
+    width: auto;
+    margin-top: 0;
+    background-color: var(--success-color);
+    white-space: nowrap;
+}
+
+.btn-refresh-dashboard:hover {
+    background-color: #059669;
+}
+
 /* ── Card Flip ── */
 .card-cidade {
     border-radius: var(--border-radius-lg);
@@ -326,6 +398,21 @@ body {
     letter-spacing: -0.03em;
     line-height: 1.1;
     margin: var(--spacing-sm) 0;
+}
+
+.faixa-termica {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.faixa-termica span {
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--border-radius-full);
+    background: var(--background-color);
 }
 
 .card-cidade .detalhes {
@@ -432,4 +519,27 @@ tr:hover td {
     border-radius: var(--border-radius-sm);
     margin-top: var(--spacing-sm);
     display: block;
+}
+
+@media (max-width: 720px) {
+    .filtros-dashboard {
+        align-items: stretch;
+    }
+
+    .filtro-bloco,
+    .form-filtros-dashboard,
+    .filtros-acoes,
+    .form-refresh-dashboard,
+    .btn-filtro-limpar {
+        width: 100%;
+    }
+
+    .filtros-acoes {
+        margin-left: 0;
+        flex-direction: column;
+    }
+
+    .btn-refresh-dashboard {
+        width: 100%;
+    }
 }

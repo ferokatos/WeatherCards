@@ -17,6 +17,40 @@
         {% endif %}
     </div>
 
+    <div class="filtros-dashboard">
+        <form method="GET" class="form-filtros-dashboard">
+            <!-- Mantém os filtros independentes e previsíveis. -->
+            <div class="filtro-bloco">
+                <label for="temperatura">Filtro térmico</label>
+                <select id="temperatura" name="temperatura" onchange="this.form.submit()">
+                    {% for valor, label in filtros_temperatura %}
+                        <option value="{{ valor }}" {% if filtro_temperatura == valor %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filtro-bloco">
+                <label for="condicao">Filtro por clima</label>
+                <select id="condicao" name="condicao" onchange="this.form.submit()">
+                    {% for valor, label in filtros_condicao %}
+                        <option value="{{ valor }}" {% if filtro_condicao == valor %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <a href="{{ url_for('cidades.index') }}" class="btn btn-outline btn-filtro-limpar">Limpar filtros</a>
+        </form>
+
+        <div class="filtros-acoes">
+            <form method="POST" action="{{ url_for('cidades.refresh_cidades') }}" class="form-refresh-dashboard">
+                <!-- Preserva o estado atual após atualizar a API. -->
+                <input type="hidden" name="temperatura" value="{{ filtro_temperatura }}">
+                <input type="hidden" name="condicao" value="{{ filtro_condicao }}">
+                <button type="submit" class="btn btn-refresh-dashboard">Atualizar clima</button>
+            </form>
+        </div>
+    </div>
+
     {% if cidades %}
         <div class="grid-cidades">
             {% for cidade in cidades %}
@@ -42,6 +76,11 @@
                             <!-- Temperatura em destaque -->
                             <div class="temperatura">{{ cidade.temperatura }}°C</div>
 
+                            <div class="faixa-termica">
+                                <span>Min {{ cidade.temp_min if cidade.temp_min is not none else '--' }}°C</span>
+                                <span>Max {{ cidade.temp_max if cidade.temp_max is not none else '--' }}°C</span>
+                            </div>
+
                             <!-- Detalhes do clima -->
                             <div class="detalhes">
                                 <p>🌤️ {{ cidade.condicao }}</p>
@@ -56,7 +95,7 @@
 
                             <!-- Botões de ação -->
                             <div class="card-actions">
-                                {% if is_admin %}
+                                {% if is_dono or is_admin %}
                                     <a href="{{ url_for('cidades.editar', id=cidade.id) }}" class="btn">✏️ Editar</a>
                                 {% endif %}
                                 {% if is_admin %}
@@ -99,10 +138,14 @@
         <!-- Mensagem quando não tem cidades -->
         <div style="text-align: center; margin-top: 3rem;">
             <p style="font-size: 3rem;">🌍</p>
-            <p style="color: var(--text-light);">Nenhuma cidade cadastrada ainda.</p>
-            <a href="{{ url_for('cidades.adicionar') }}" class="btn" style="margin-top: 1rem;">
-                Adicionar primeira cidade
-            </a>
+            {% if filtro_temperatura != 'todas' or filtro_condicao != 'todas' %}
+                <p style="color: var(--text-light);">Nenhuma cidade encontrada com os filtros atuais.</p>
+            {% else %}
+                <p style="color: var(--text-light);">Nenhuma cidade cadastrada ainda.</p>
+                <a href="{{ url_for('cidades.adicionar') }}" class="btn" style="margin-top: 1rem;">
+                    Adicionar primeira cidade
+                </a>
+            {% endif %}
         </div>
     {% endif %}
 

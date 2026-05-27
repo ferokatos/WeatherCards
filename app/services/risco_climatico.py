@@ -11,8 +11,9 @@ NIVEIS_RISCO = {
 def classificar_risco(cidade):
     """Classifica o nível de risco climático de uma cidade.
 
-    Leva em conta temperatura máxima, mínima, umidade e condição do céu
-    para atribuir um dos quatro níveis: critico, alto, moderado ou baixo.
+    Leva em conta temperatura máxima, mínima, umidade e o grupo de condição
+    climática (tempestade, neve, névoa, etc.) para atribuir um dos quatro
+    níveis: critico, alto, moderado ou baixo.
 
     Retorna um dicionário com as chaves 'nivel', 'label', 'emoji' e 'motivos'.
     """
@@ -39,7 +40,7 @@ def classificar_risco(cidade):
         motivos.append("Condição de tempestade")
 
     # ── Risco Alto ───────────────────────────────────────────────
-    if nivel not in ("critico",):
+    if nivel != "critico":
         if temp_max is not None and temp_max >= 33:
             if nivel == "baixo":
                 nivel = "alto"

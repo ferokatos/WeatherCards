@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+
+    <div style="margin-bottom: var(--spacing-xl);">
+        <h2>🌍 Área Alvo da Mudança Climática</h2>
+        <p style="color: var(--text-light); margin-top: var(--spacing-xs);">
+            Cidades classificadas por nível de risco climático com base em temperatura, umidade e condições do tempo.
+        </p>
+    </div>
+
+    <!-- Resumo por nível -->
+    <div class="risco-resumo">
+        {% for nivel_key in ['critico', 'alto', 'moderado', 'baixo'] %}
+            {% set nivel_info = niveis_risco[nivel_key] %}
+            <a href="{{ url_for('cidades.mudanca_climatica', nivel=nivel_key) }}"
+               class="risco-badge-link {{ 'ativo' if filtro_nivel == nivel_key }}">
+                <div class="risco-resumo-card risco-{{ nivel_key }}">
+                    <span class="risco-emoji">{{ nivel_info.emoji }}</span>
+                    <span class="risco-label">{{ nivel_info.label }}</span>
+                </div>
+            </a>
+        {% endfor %}
+        <a href="{{ url_for('cidades.mudanca_climatica') }}"
+           class="risco-badge-link {{ 'ativo' if filtro_nivel == 'todos' }}">
+            <div class="risco-resumo-card risco-todos">
+                <span class="risco-emoji">🌐</span>
+                <span class="risco-label">Todos</span>
+            </div>
+        </a>
+    </div>
+
+    {% if cidades_com_risco %}
+        <div class="grid-cidades" style="margin-top: var(--spacing-lg);">
+            {% for cidade, risco in cidades_com_risco %}
+                <div class="card-cidade">
+                    <div class="card-frente">
+
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--spacing-sm);">
+                            <h2>{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h2>
+                            <span class="risco-tag risco-{{ risco.nivel }}">
+                                {{ risco.emoji }} {{ risco.label }}
+                            </span>
+                        </div>
+
+                        <div class="temperatura">{{ cidade.temperatura }}°C</div>
+
+                        <div class="faixa-termica">
+                            <span>Min {{ cidade.temp_min if cidade.temp_min is not none else '--' }}°C</span>
+                            <span>Max {{ cidade.temp_max if cidade.temp_max is not none else '--' }}°C</span>
+                        </div>
+
+                        <div class="detalhes">
+                            <p>🌤️ {{ cidade.condicao }}</p>
+                            <p>💧 Umidade: {{ cidade.umidade }}%</p>
+                            <p>💨 Vento: {{ cidade.vento }} km/h</p>
+                        </div>
+
+                        <div class="risco-motivos">
+                            <strong>Fatores de risco:</strong>
+                            <ul>
+                                {% for motivo in risco.motivos %}
+                                    <li>{{ motivo }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; margin-top: 3rem;">
+            <p style="font-size: 3rem;">✅</p>
+            <p style="color: var(--text-light);">
+                Nenhuma cidade encontrada para o nível de risco selecionado.
+            </p>
+            <a href="{{ url_for('cidades.mudanca_climatica') }}" class="btn" style="max-width: 260px; margin: var(--spacing-lg) auto 0;">
+                Ver todas as cidades
+            </a>
+        </div>
+    {% endif %}
+
+    <div style="margin-top: var(--spacing-xl);">
+        <a href="{{ url_for('cidades.index') }}" class="btn btn-outline" style="max-width: 200px;">
+            ← Voltar ao Dashboard
+        </a>
+    </div>
+
+{% endblock %}

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from app.dados import Cidades, CIDADES_SALVAS, buscar_cidade_por_id
 from app.services.filtros_cidades import FILTRO_CONDICAO_OPCOES, filtrar_cidades
 from app.services.weather import buscar_clima, WeatherServiceError, normalizar_grupo_condicao
+from app.services.risco_climatico import agrupar_cidades_por_risco, NIVEIS_RISCO
 import io
 import pandas as pd
 import matplotlib
@@ -258,3 +259,28 @@ def grafico(id):
     buf.seek(0)
 
     return send_file(buf, mimetype='image/png')
+
+
+@cidades_bp.route("/clima/mudanca-climatica")
+def mudanca_climatica():
+    """Área Alvo da Mudança Climática — classifica cidades por nível de risco."""
+    if not usuario_logado():
+        return redirect(url_for("auth.login"))
+
+    filtro_nivel = request.args.get("nivel", "todos")
+
+    cidades_com_risco = agrupar_cidades_por_risco(CIDADES_SALVAS)
+
+    if filtro_nivel != "todos":
+        cidades_com_risco = [
+            (cidade, risco)
+            for cidade, risco in cidades_com_risco
+            if risco["nivel"] == filtro_nivel
+        ]
+
+    return render_template(
+        "mudanca_climatica.html",
+        cidades_com_risco=cidades_com_risco,
+        niveis_risco=NIVEIS_RISCO,
+        filtro_nivel=filtro_nivel,
+    )

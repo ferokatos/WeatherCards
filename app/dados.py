@@ -152,6 +152,24 @@ def popular_cidades_padrao():
             print(f"❌ Erro inesperado em {nome}: {e}")
 
 
+#!------------------------------------------------------------------
+#!                          Classe de formulário
+#!------------------------------------------------------------------
+
+class Formulario:
+    numero_do_formulario = 1
+    Lista_de_formularios = []
+    def __init__(self,estrelas:int =None,comentario:str ="Nada",usuario=None):
+        self.estrelas = estrelas
+        self.comentario = comentario
+        self.usuario_nome = usuario.nome
+        self.usuario_id = usuario.id
+        self.id = self.numero_do_formulario
+        self.id_do_formulario += 1
+        self.Lista_de_formularios.append(self)
+
+
+
 #!Teste local
 if __name__ == "__main__":
     print("=" * 50)

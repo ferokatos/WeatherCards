@@ -148,6 +148,33 @@
         </div>
     {% endif %}
 
+    <!--Formulário de Avaliação-->
+    {% if session.get('pode_avaliar') and not session.get('ja_avaliou') %}
+    <div style="margin-top: var(--spacing-xl); text-align: center;">
+        <h3>⭐ Avalie o nosso sistema</h3>
+        <p style="color: var(--text-light);">Nos conte como foi a sua experiência</p>
+        <form method="POST" action="{{url_for('formulario.avaliar')}}">
+
+            <!--Estrelas-->
+            <div style="font-size: 2rem; margin: 1rem 0;">
+                {% for i in [5, 4, 3, 2, 1] %}
+                    <input type="radio" name="estrelas" value="{{ i }}" id="star{{ i }}" style="display:none;" required>
+                    <label for="star{{ i }}" style="cursor: pointer;">★</label>
+                {% endfor %}
+            </div>
+            <div style="margin: 1rem 0;">
+                <textarea name="comentario" placeholder="Deixe um comentário (opcional)" style="width: 50%; padding: 10px; border-radius: 8px "></textarea>
+            </div>
+            <!--Botão de enviar avaliação-->
+            <button type="submit" class="btn">Enviar Avaliação</button>
+        </form>
+    </div>
+    {% elif session.get('ja_avaliou') %}
+    <div style="margin-top: var(--spacing-xl); text-align: center;">
+        <h3>Obrigado por  nós avaliar! 🙌</h3>
+        <p style="color: var(--text-light);">Sua opinião é muito importante para nós.</p>
+    </div>
+    {% endif %}
     <script>
         // Função original para virar o card
         function virarCard(id) {

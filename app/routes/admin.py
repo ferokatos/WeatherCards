@@ -12,3 +12,14 @@ def painel():
         
     usuarios = Usuario_padrao.USUARIOS
     return render_template("admin.html", usuarios=usuarios)
+from app.dados import Usuario_padrao, Formulario
+
+@admin_bp.route("/admin")
+def painel():
+    if session.get("cargo") != "admin":
+        flash("Acesso restrito.", "erro")
+        return redirect(url_for("cidades.index"))
+
+    usuarios = Usuario_padrao.USUARIOS
+    avaliacoes = Formulario.Lista_de_formularios  # ← adiciona isso!
+    return render_template("admin.html", usuarios=usuarios, avaliacoes=avaliacoes)

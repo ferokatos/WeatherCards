@@ -165,8 +165,8 @@ class Formulario:
         self.usuario_nome = usuario.nome
         self.usuario_id = usuario.id
         self.id = self.numero_do_formulario
-        self.id_do_formulario += 1
-        self.Lista_de_formularios.append(self)
+        Formulario.numero_do_formulario +=1
+        Formulario.Lista_de_formularios.append(self)
 
 
 

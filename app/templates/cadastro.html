@@ -2,32 +2,52 @@
 {% block titulo %}Cadastro{% endblock %}
  
 {% block conteudo %}
-<div class="container">
-    <div class="form-container">
-        <h2 style="text-align: center; margin-bottom: 1.5rem;">📝 Cadastro</h2>
- 
+<section class="auth-shell auth-shell-register">
+    <aside class="auth-panel auth-panel-brand auth-panel-light">
+        <span class="hero-kicker">Novo acesso</span>
+        <h1 class="hero-title">Crie seu perfil para operar o ambiente climático</h1>
+        <p class="hero-subtitle">Cadastre um usuário padrão ou administrativo e mantenha o monitoramento compartilhado entre a equipe.</p>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <strong>Controle por cargo</strong>
+                <p>Perfis admin acessam gestão e ações sensíveis no painel.</p>
+            </div>
+            <div class="feature-item">
+                <strong>Onboarding direto</strong>
+                <p>Formulário enxuto, com estrutura clara e validação objetiva.</p>
+            </div>
+        </div>
+    </aside>
+
+    <div class="form-container auth-card">
+        <div class="form-heading">
+            <span class="hero-kicker">Cadastro</span>
+            <h2>📝 Criar conta</h2>
+            <p>Preencha os dados abaixo para liberar um novo acesso ao sistema.</p>
+        </div>
+
         <form method="POST" action="{{ url_for('auth.cadastro') }}">
- 
             <div class="form-group">
                 <label>Nome</label>
                 <input type="text" name="nome" placeholder="Seu nome" required>
             </div>
- 
+
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" name="email" placeholder="seu@email.com" required>
             </div>
- 
+
             <div class="form-group">
                 <label>Senha</label>
                 <input type="password" name="senha" placeholder="mínimo 8 caracteres" required>
             </div>
- 
+
             <div class="form-group">
                 <label>Confirmar Senha</label>
                 <input type="password" name="confirmacao_senha" placeholder="repita a senha" required>
             </div>
- 
+
             <div class="form-group">
                 <label>Tipo de usuário</label>
                 <select name="tipo_usuario">
@@ -35,15 +55,14 @@
                     <option value="admin">Admin</option>
                 </select>
             </div>
- 
-            <button type="submit" class="btn" style="width: 100%;">Cadastrar</button>
- 
+
+            <button type="submit" class="btn btn-block">Cadastrar</button>
         </form>
- 
-        <p style="text-align: center; margin-top: 1rem;">
+
+        <p class="form-helper-text">
             Já tem conta?
             <a href="{{ url_for('auth.login') }}">Faça login</a>
         </p>
     </div>
-</div>
+</section>
 {% endblock %}

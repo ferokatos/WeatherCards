@@ -2,31 +2,64 @@
 {% block titulo %}Login{% endblock %}
  
 {% block conteudo %}
-<div class="container">
-    <div class="form-container">
-        <h2 style="text-align: center; margin-bottom: 1.5rem;">🌦️ Login</h2>
- 
+<section class="auth-shell">
+    <aside class="auth-panel auth-panel-brand">
+        <span class="hero-kicker">Bem-vindo de volta</span>
+        <h1 class="hero-title">Entre para acompanhar o clima com leitura estratégica</h1>
+        <p class="hero-subtitle">Risco, conforto e tendência reunidos em uma interface mais clara para decidir melhor o dia.</p>
+
+        <div class="feature-list">
+            <div class="feature-item">
+                <strong>Dashboard com inteligência</strong>
+                <p>Cards com índice de conforto, alertas e recomendação prática por cidade.</p>
+            </div>
+            <div class="feature-item">
+                <strong>Histórico visual ampliado</strong>
+                <p>Abra o gráfico em modal sem perder o contexto do card principal.</p>
+            </div>
+        </div>
+    </aside>
+
+    <div class="form-container auth-card">
+        <div class="form-heading">
+            <span class="hero-kicker">Acesso</span>
+            <h2>🌦️ Login</h2>
+            <p>Use suas credenciais para abrir o painel de monitoramento.</p>
+        </div>
+
         <form method="POST" action="{{ url_for('auth.login') }}">
- 
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" name="email" placeholder="seu@email.com" required>
             </div>
- 
+
             <div class="form-group">
                 <label>Senha</label>
                 <input type="password" name="senha" placeholder="sua senha" required>
             </div>
- 
-            <button type="submit" class="btn" style="width: 100%;">Entrar</button>
- 
+
+            <button type="submit" class="btn btn-block">Entrar</button>
         </form>
- 
-        <p style="text-align: center; margin-top: 1rem;">
+
+        <div class="credential-box">
+            <p class="credential-title">Acessos padrão</p>
+            <div class="credential-item">
+                <strong>Admin</strong>
+                <span>admin@weathercards.local</span>
+                <small>admin1234</small>
+            </div>
+            <div class="credential-item">
+                <strong>Usuário</strong>
+                <span>usuario@weathercards.local</span>
+                <small>usuario123</small>
+            </div>
+        </div>
+
+        <p class="form-helper-text">
             Não tem conta?
             <a href="{{ url_for('auth.cadastro') }}">Cadastre-se</a>
         </p>
     </div>
-</div>
+</section>
 {% endblock %}
  

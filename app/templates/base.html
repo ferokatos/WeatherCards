@@ -4,40 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌦️ WeatherCards</title>
+    <title>{% block titulo %}WeatherCards{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
 </head>
 <body>
-    <!-- Navbar com links condicionados por acesso -->
+    <div class="page-background" aria-hidden="true">
+        <div class="background-orb orb-one"></div>
+        <div class="background-orb orb-two"></div>
+        <div class="background-grid"></div>
+    </div>
+
     <nav class="navbar">
-        <a href="{{ url_for('cidades.index') }}" class="logo">WeatherCards</a>
-        <div class="nav-links">
-            {% if session.get('usuario_id') %}
-                <span style="margin-right: 15px;">Olá, {{ session.get('usuario_nome') }}</span>
-                <a href="{{ url_for('cidades.index') }}">Dashboard</a>
-                <a href="{{ url_for('cidades.adicionar') }}">Adicionar Cidade</a>
-                
-                {% if session.get('cargo') == 'admin' %}
-                    <a href="{{ url_for('admin.painel') }}">Painel Admin</a>
+        <div class="navbar-inner container">
+            <a href="{{ url_for('cidades.index') }}" class="brand">
+                <span class="brand-mark">WC</span>
+                <span class="brand-copy">
+                    <strong>WeatherCards</strong>
+                    <small>Clima com contexto para decisão</small>
+                </span>
+            </a>
+
+            <div class="nav-cluster">
+                {% if session.get('usuario_id') %}
+                    <span class="nav-user-chip">
+                        <small>{{ session.get('cargo')|upper }}</small>
+                        <strong>{{ session.get('usuario_nome') }}</strong>
+                    </span>
+
+                    <div class="nav-links">
+                        <a href="{{ url_for('cidades.index') }}">Dashboard</a>
+                        <a href="{{ url_for('cidades.adicionar') }}">Adicionar Cidade</a>
+                        {% if session.get('cargo') == 'admin' %}
+                            <a href="{{ url_for('admin.painel') }}">Painel Admin</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}">Sair</a>
+                    </div>
+                {% else %}
+                    <div class="nav-links">
+                        <a href="{{ url_for('auth.login') }}">Login</a>
+                        <a href="{{ url_for('auth.cadastro') }}">Cadastro</a>
+                    </div>
                 {% endif %}
-                
-                <a href="{{ url_for('auth.logout') }}">Sair</a>
-            {% else %}
-                <a href="{{ url_for('auth.login') }}">Login</a>
-                <a href="{{ url_for('auth.cadastro') }}">Cadastro</a>
-            {% endif %}
+            </div>
         </div>
     </nav>
 
-    <!-- Container Central -->
-    <div class="container">
-        <!-- Mensagens flash do Flask -->
-        {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
-            <div class="alerta {{ categoria }}">{{ mensagem }}</div>
-        {% endfor %}
+    <main class="app-shell">
+        <div class="container">
+            {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
+                <div class="alerta {{ categoria }}">{{ mensagem }}</div>
+            {% endfor %}
 
-        <!-- Conteúdo específico de cada página -->
-        {% block conteudo %}{% endblock %}
-    </div>
+            {% block conteudo %}{% endblock %}
+        </div>
+    </main>
 </body>
 </html>

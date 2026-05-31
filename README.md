@@ -15,11 +15,10 @@ Acesse: http://127.0.0.1:5001
 
 ## 👥 Usuários padrão
 
-| Nome  | Senha     | Cargo   |
-|-------|-----------|---------|
-| Admin | admin123  | admin   |
-| João  | joao123   | usuario |
-| Maria | maria123  | usuario |
+| Nome    | Email                      | Senha      | Cargo   |
+|---------|----------------------------|------------|---------|
+| Admin   | admin@weathercards.local   | admin1234  | admin   |
+| Usuario | usuario@weathercards.local | usuario123 | padrão  |
 
 ## 📁 Estrutura
 - `app/routes/`   → rotas Flask

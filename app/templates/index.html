@@ -3,19 +3,28 @@
 
 {% block conteudo %}
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
-        <div>
-            <h2>Dashboard Climático</h2>
-            <small style="color: var(--text-light);">
-                {{ cidades|length }} cidade(s) cadastrada(s)
-            </small>
+    <section class="page-hero dashboard-hero">
+        <div class="page-hero-copy">
+            <span class="hero-kicker">Monitoramento ao vivo</span>
+            <h1 class="hero-title">Dashboard climático</h1>
+            <p class="hero-subtitle">Acompanhe conforto, risco e tendência por cidade sem perder a leitura operacional do momento.</p>
         </div>
-        {% if session.get('cargo') == 'admin' %}
-            <a href="{{ url_for('cidades.adicionar') }}" class="btn">➕ Nova Cidade</a>
-        {% endif %}
-    </div>
+        <div class="page-hero-side">
+            <div class="hero-stat">
+                <small>Cidades monitoradas</small>
+                <strong>{{ cidades|length }}</strong>
+            </div>
+            <div class="hero-stat">
+                <small>Estado atual</small>
+                <strong>{% if filtro_temperatura != 'todas' or filtro_condicao != 'todas' %}Com filtros{% else %}Visão completa{% endif %}</strong>
+            </div>
+            {% if session.get('cargo') == 'admin' %}
+                <a href="{{ url_for('cidades.adicionar') }}" class="btn">➕ Nova Cidade</a>
+            {% endif %}
+        </div>
+    </section>
 
-    <div class="filtros-dashboard">
+    <div class="filtros-dashboard surface-panel">
         <form method="GET" class="form-filtros-dashboard">
             <div class="filtro-bloco">
                 <label for="temperatura">Filtro térmico</label>
@@ -55,79 +64,103 @@
                 {% set is_admin = session.get('cargo') == 'admin' %}
 
                 <div class="card-cidade" id="card-{{ cidade.id }}">
-                    <div class="card-inner">
+                    <div class="card-frente">
 
-                        <div class="card-frente">
-
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div class="card-header-cidade">
+                            <div class="cidade-header-copy">
+                                <span class="cidade-eyebrow">{{ cidade.grupo_condicao|replace('-', ' ')|title }}</span>
                                 <h2>{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h2>
-                                <button class="btn-virar" onclick="virarCard('card-{{ cidade.id }}')" title="Ver gráfico">
+                                <div class="insights-inline">
+                                    <span class="risco-badge {{ cidade.insights.risco.classe }}">Risco {{ cidade.insights.risco.label }}</span>
+                                    <span class="tendencia-badge {{ cidade.insights.tendencia.classe }}">
+                                        {{ cidade.insights.tendencia.seta }} {{ cidade.insights.tendencia.label }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="card-header-aside">
+                                <div class="selo-conforto" aria-label="Índice de conforto {{ cidade.insights.indice_conforto }}">
+                                    <small>Conforto</small>
+                                    <strong>{{ cidade.insights.indice_conforto }}</strong>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="btn-virar"
+                                    data-grafico="{{ url_for('cidades.grafico', id=cidade.id) }}"
+                                    onclick="abrirModalGrafico('modal-{{ cidade.id }}', this.dataset.grafico)"
+                                    title="Abrir gráfico em destaque"
+                                >
                                     📊
                                 </button>
                             </div>
-
-                            <div class="temperatura">{{ cidade.temperatura }}°C</div>
-
-                            <div class="faixa-termica">
-                                <span>Min {{ cidade.temp_min if cidade.temp_min is not none else '--' }}°C</span>
-                                <span>Max {{ cidade.temp_max if cidade.temp_max is not none else '--' }}°C</span>
-                            </div>
-
-                            <div class="detalhes">
-                                <p>🌤️ {{ cidade.condicao }}</p>
-                                <p>💧 Umidade: {{ cidade.umidade }}%</p>
-                                <p>💨 Vento: {{ cidade.vento }} km/h</p>
-                            </div>
-
-                            <small style="color: var(--text-light);">
-                                Adicionado por: {{ cidade.adicionado_por_nome }}
-                            </small>
-
-                            <div class="card-actions">
-                                {% if is_dono or is_admin %}
-                                    <a href="{{ url_for('cidades.editar', id=cidade.id) }}" class="btn">✏️ Editar</a>
-                                {% endif %}
-                                {% if is_admin %}
-                                    <form action="{{ url_for('cidades.deletar', id=cidade.id) }}" method="POST" style="display: inline;">
-                                        <button type="submit" class="btn btn-danger"
-                                            onclick="return confirm('Tem certeza que deseja deletar {{ cidade.nome }}?');">
-                                            🗑️ Excluir
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            </div>
-
                         </div>
 
-                        <div class="card-verso">
+                        <div class="temperatura">{{ cidade.temperatura }}°C</div>
 
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
-                                <h3>📈 Histórico — {{ cidade.nome }}</h3>
-                                <button class="btn-virar" onclick="virarCard('card-{{ cidade.id }}')" title="Voltar">
-                                    ✖
-                                </button>
+                        <div class="faixa-termica">
+                            <span>Min {{ cidade.temp_min if cidade.temp_min is not none else '--' }}°C</span>
+                            <span>Max {{ cidade.temp_max if cidade.temp_max is not none else '--' }}°C</span>
+                        </div>
+
+                        <div class="cidade-metricas-grid">
+                            <div class="metrica-clima">
+                                <small>Condição</small>
+                                <strong>{{ cidade.condicao }}</strong>
                             </div>
+                            <div class="metrica-clima">
+                                <small>Umidade</small>
+                                <strong>{{ cidade.umidade }}%</strong>
+                            </div>
+                            <div class="metrica-clima">
+                                <small>Vento</small>
+                                <strong>{{ cidade.vento }} km/h</strong>
+                            </div>
+                        </div>
 
-                            <img
-                                class="grafico-img"
-                                data-src="{{ url_for('cidades.grafico', id=cidade.id) }}"
-                                alt="Gráfico de {{ cidade.nome }}"
-                                style="cursor: zoom-in;"
-                                onclick="abrirModalGrafico('modal-{{ cidade.id }}', this.src)"
-                            >
+                        <div class="card-recomendacao">
+                            <span class="card-recomendacao-label">Recomendação do dia</span>
+                            <p>{{ cidade.insights.recomendacoes[0] }}</p>
+                        </div>
 
-                            <dialog id="modal-{{ cidade.id }}" class="modal-grafico" onclick="fecharModalSeClicarFora(event, this)">
-                                <div class="modal-content">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        {% if cidade.insights.recomendacoes|length > 1 %}
+                            <div class="lista-recomendacoes">
+                                {% for recomendacao in cidade.insights.recomendacoes[1:] %}
+                                    <p>• {{ recomendacao }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="cidade-footer-meta">
+                            <small>Adicionado por: {{ cidade.adicionado_por_nome }}</small>
+                            <small>Atualização em memória</small>
+                        </div>
+
+                        <div class="card-actions">
+                            {% if is_dono or is_admin %}
+                                <a href="{{ url_for('cidades.editar', id=cidade.id) }}" class="btn">✏️ Editar</a>
+                            {% endif %}
+                            {% if is_admin %}
+                                <form action="{{ url_for('cidades.deletar', id=cidade.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger"
+                                        onclick="return confirm('Tem certeza que deseja deletar {{ cidade.nome }}?');">
+                                        🗑️ Excluir
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+                        <dialog id="modal-{{ cidade.id }}" class="modal-grafico" onclick="fecharModalSeClicarFora(event, this)">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div>
                                         <h3>Histórico Expandido — {{ cidade.nome }}</h3>
-                                        <button class="btn-close-modal" onclick="this.closest('dialog').close()">✖</button>
+                                        <p class="modal-subtitle">Leitura de temperatura, umidade e vento em janela ampliada.</p>
                                     </div>
-                                    <img src="" class="grafico-expandido">
+                                    <button type="button" class="btn-close-modal" onclick="this.closest('dialog').close()">✖</button>
                                 </div>
-                            </dialog>
-
-                        </div>
-
+                                <img src="" class="grafico-expandido" alt="Gráfico ampliado de {{ cidade.nome }}">
+                            </div>
+                        </dialog>
                     </div>
                 </div>
 
@@ -135,13 +168,13 @@
         </div>
 
     {% else %}
-        <div style="text-align: center; margin-top: 3rem;">
-            <p style="font-size: 3rem;">🌍</p>
+        <div class="empty-state surface-panel">
+            <p class="empty-state-icon">🌍</p>
             {% if filtro_temperatura != 'todas' or filtro_condicao != 'todas' %}
-                <p style="color: var(--text-light);">Nenhuma cidade encontrada com os filtros atuais.</p>
+                <p class="empty-state-text">Nenhuma cidade encontrada com os filtros atuais.</p>
             {% else %}
-                <p style="color: var(--text-light);">Nenhuma cidade cadastrada ainda.</p>
-                <a href="{{ url_for('cidades.adicionar') }}" class="btn" style="margin-top: 1rem;">
+                <p class="empty-state-text">Nenhuma cidade cadastrada ainda.</p>
+                <a href="{{ url_for('cidades.adicionar') }}" class="btn btn-inline-action">
                     Adicionar primeira cidade
                 </a>
             {% endif %}
@@ -149,33 +182,17 @@
     {% endif %}
 
     <script>
-        // Função original para virar o card
-        function virarCard(id) {
-            const card = document.getElementById(id);
-            card.classList.toggle('virado');
-
-            // Carrega a imagem só quando o card virar (lazy load)
-            if (card.classList.contains('virado')) {
-                const img = card.querySelector('.grafico-img');
-                if (img && !img.src) {
-                    img.src = img.dataset.src;
-                }
-            }
-        }
-
-        // NOVA FUNÇÃO: Abre o modal e carrega a imagem grande
         function abrirModalGrafico(modalId, imgSrc) {
             const modal = document.getElementById(modalId);
             const imgExpandida = modal.querySelector('.grafico-expandido');
-            
-            // Define a origem da imagem do modal como a mesma da imagem clicada
-            imgExpandida.src = imgSrc;
-            
-            // Abre o modal nativo
+
+            if (imgExpandida.getAttribute('src') !== imgSrc) {
+                imgExpandida.src = imgSrc;
+            }
+
             modal.showModal();
         }
 
-        // NOVA FUNÇÃO: Fecha o modal se o usuário clicar no fundo escuro
         function fecharModalSeClicarFora(event, modal) {
             if (event.target === modal) {
                 modal.close();

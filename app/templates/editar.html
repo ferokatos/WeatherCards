@@ -1,62 +1,73 @@
 {% extends "base.html" %}
 
 {% block conteudo %}
-    <div class="form-container">
-        <h2 style="text-align: center; margin-bottom: var(--spacing-sm);">Editar: {{ cidade.nome }}, {{ cidade.pais }}</h2>
-        
-        <!-- Formulário de Refresh via API Externa -->
-        <form method="POST" action="{{ url_for('cidades.editar', id=cidade.id) }}" style="text-align: center; margin-bottom: var(--spacing-lg);">
-            <input type="hidden" name="acao" value="refresh">
-            <button type="submit" class="btn" style="background-color: var(--success-color);">
-                Refresh
-            </button>
-            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 5px;">
-                Busca os dados mais recentes do clima no OpenWeather e sobrescreve.
-            </p>
-        </form>
-        
-        <hr style="margin-bottom: var(--spacing-lg); border: 0; border-top: 1px solid #e2e8f0;">
-
-        <!-- Formulário Manual -->
-        <form method="POST" action="{{ url_for('cidades.editar', id=cidade.id) }}">
-            <input type="hidden" name="acao" value="manual">
-            
-            <div class="form-group">
-                <label for="temperatura">Temperatura (°C)</label>
-                <input type="number" step="0.1" id="temperatura" name="temperatura" value="{{ cidade.temperatura }}" required>
-            </div>
-
-            <!-- Mantém a faixa térmica editável junto da leitura atual. -->
-            <div class="form-group">
-                <label for="temp_min">Temperatura mínima (°C)</label>
-                <input type="number" step="0.1" id="temp_min" name="temp_min" value="{{ cidade.temp_min if cidade.temp_min is not none else cidade.temperatura }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="temp_max">Temperatura máxima (°C)</label>
-                <input type="number" step="0.1" id="temp_max" name="temp_max" value="{{ cidade.temp_max if cidade.temp_max is not none else cidade.temperatura }}" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="umidade">Umidade (%)</label>
-                <input type="number" id="umidade" name="umidade" value="{{ cidade.umidade }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="vento">Vento (m/s)</label>
-                <input type="number" step="0.1" id="vento" name="vento" value="{{ cidade.vento }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="condicao">Condição</label>
-                <input type="text" id="condicao" name="condicao" value="{{ cidade.condicao }}" required>
-            </div>
-            
-            <button type="submit" class="btn" style="width: 100%;">Salvar Alterações Manuais</button>
-        </form>
-        
-        <div style="text-align: center; margin-top: var(--spacing-md);">
-            <a href="{{ url_for('cidades.index') }}" style="color: var(--primary-color);">Voltar ao Dashboard</a>
+    <section class="page-hero compact-hero">
+        <div class="page-hero-copy">
+            <span class="hero-kicker">Ajuste fino</span>
+            <h1 class="hero-title">Editar {{ cidade.nome }}, {{ cidade.pais }}</h1>
+            <p class="hero-subtitle">Atualize a cidade via OpenWeather ou faça correções manuais mantendo o histórico em memória.</p>
         </div>
-    </div>
+    </section>
+
+    <section class="form-page-grid">
+        <aside class="info-panel">
+            <span class="hero-kicker">Resumo atual</span>
+            <h3>{{ cidade.emoji }} {{ cidade.temperatura }}°C</h3>
+            <p>{{ cidade.condicao }} com umidade de {{ cidade.umidade }}% e vento de {{ cidade.vento }} km/h.</p>
+
+            <form method="POST" action="{{ url_for('cidades.editar', id=cidade.id) }}" class="mini-action-form">
+                <input type="hidden" name="acao" value="refresh">
+                <button type="submit" class="btn btn-success btn-block">Atualizar pela API</button>
+                <p class="panel-helper-text">Busca os dados mais recentes do OpenWeather e sobrescreve os valores atuais.</p>
+            </form>
+        </aside>
+
+        <div class="form-container form-card-wide">
+            <div class="form-heading">
+                <span class="hero-kicker">Edição manual</span>
+                <h2>Refinar leitura climática</h2>
+                <p>Os campos abaixo alimentam o card, o histórico e o módulo de insights.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('cidades.editar', id=cidade.id) }}">
+                <input type="hidden" name="acao" value="manual">
+
+                <div class="form-group">
+                    <label for="temperatura">Temperatura (°C)</label>
+                    <input type="number" step="0.1" id="temperatura" name="temperatura" value="{{ cidade.temperatura }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="temp_min">Temperatura mínima (°C)</label>
+                    <input type="number" step="0.1" id="temp_min" name="temp_min" value="{{ cidade.temp_min if cidade.temp_min is not none else cidade.temperatura }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="temp_max">Temperatura máxima (°C)</label>
+                    <input type="number" step="0.1" id="temp_max" name="temp_max" value="{{ cidade.temp_max if cidade.temp_max is not none else cidade.temperatura }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="umidade">Umidade (%)</label>
+                    <input type="number" id="umidade" name="umidade" value="{{ cidade.umidade }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="vento">Vento (m/s)</label>
+                    <input type="number" step="0.1" id="vento" name="vento" value="{{ cidade.vento }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="condicao">Condição</label>
+                    <input type="text" id="condicao" name="condicao" value="{{ cidade.condicao }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-block">Salvar Alterações Manuais</button>
+            </form>
+
+            <p class="form-helper-text">
+                <a href="{{ url_for('cidades.index') }}">Voltar ao Dashboard</a>
+            </p>
+        </div>
+    </section>
 {% endblock %}

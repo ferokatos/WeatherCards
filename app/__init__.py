@@ -15,7 +15,8 @@ def criar_app():
 
     # Popula as cidades padrão ao iniciar o app
     with app.app_context():
-        from app.dados import popular_cidades_padrao
+        from app.dados import popular_cidades_padrao, popular_usuarios_padrao
+        popular_usuarios_padrao()
         popular_cidades_padrao()
 
     return app

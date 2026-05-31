@@ -36,6 +36,7 @@ def login():
             session["usuario_id"]   = usuario.id
             session["usuario_nome"] = usuario.nome
             session["cargo"]        = usuario.cargo
+            session["ja_avaliou"]   = usuario.ja_avaliou
             return redirect(url_for("cidades.index"))  # vai pro dashboard
 
         # Se não encontrou, volta pro login com mensagem de erro

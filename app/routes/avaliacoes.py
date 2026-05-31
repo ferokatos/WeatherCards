@@ -1,6 +1,6 @@
 #Rota para salvar avaliação
 from flask import Blueprint, request, session, redirect,flash,url_for
-from app.dados import Formulario
+from app.dados import Formulario,Usuario_padrao
 from types import SimpleNamespace
 
 formulario_bp = Blueprint('formulario', __name__)
@@ -26,6 +26,11 @@ def avaliar():
 
     #Cria e salva o formulário enviado
     Formulario(estrelas=estrelas,comentario=comentario,usuario=usuario)
+    
+    # Marca no objeto do usuário que já avaliou
+    usuario_obj = next((u for u in Usuario_padrao.USUARIOS if u.id == session.get('usuario_id')), None)
+    if usuario_obj:
+        usuario_obj.ja_avaliou = True
 
     #Marca na sessão que "ja_avaliou" como True
     session['ja_avaliou'] = True

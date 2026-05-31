@@ -14,6 +14,7 @@ class Usuario_padrao:
         self.senha = senha
         self.id =Usuario_padrao.ID_atual
         self.cargo = "padrão"
+        self.ja_avaliou = False
         Usuario_padrao.ID_atual += 1
         Usuario_padrao.USUARIOS.append(self)
 

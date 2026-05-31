@@ -261,3 +261,29 @@ body {
 @media (max-width: 720px) {
     .filtros-dashboard { flex-direction: column; }
 }
+
+/* Sistema de estrelas */
+.estrelas-container {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 4px;
+}
+
+.estrelas-container input[type="radio"] {
+    display: none;
+}
+
+.estrelas-container label {
+    font-size: 2.5rem;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+/* Estrela selecionada e anteriores ficam amarelas */
+.estrelas-container input[type="radio"]:checked ~ label,
+.estrelas-container label:hover,
+.estrelas-container label:hover ~ label {
+    color: #f59e0b;
+}

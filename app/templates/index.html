@@ -71,17 +71,17 @@
                                 <span class="cidade-eyebrow">{{ cidade.grupo_condicao|replace('-', ' ')|title }}</span>
                                 <h2>{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h2>
                                 <div class="insights-inline">
-                                    <span class="risco-badge">{{ cidade.condicao }}</span>
-                                    <span class="tendencia-badge">
-                                        {{ cidade.grupo_condicao|replace('-', ' ')|title }}
+                                    <span class="risco-badge {{ cidade.insights.risco.classe }}">{{ cidade.insights.risco.label }}</span>
+                                    <span class="tendencia-badge {{ cidade.insights.tendencia.classe }}">
+                                        {{ cidade.insights.tendencia.seta }} {{ cidade.insights.tendencia.label }}
                                     </span>
                                 </div>
                             </div>
 
                             <div class="card-header-aside">
-                                <div class="selo-conforto" aria-label="Umidade {{ cidade.umidade }}%">
-                                    <small>Umidade</small>
-                                    <strong>{{ cidade.umidade }}%</strong>
+                                <div class="selo-conforto" aria-label="Índice de conforto {{ cidade.insights.indice_conforto }}">
+                                    <small>Conforto</small>
+                                    <strong>{{ cidade.insights.indice_conforto }}</strong>
                                 </div>
                                 <button
                                     type="button"
@@ -118,8 +118,12 @@
                         </div>
 
                         <div class="card-recomendacao">
-                            <span class="card-recomendacao-label">Condição atual</span>
-                            <p>{{ cidade.emoji }} {{ cidade.condicao }} em {{ cidade.nome }}</p>
+                            <span class="card-recomendacao-label">Recomendação</span>
+                            {% if cidade.insights.recomendacoes %}
+                                <p>{{ cidade.insights.recomendacoes[0] }}</p>
+                            {% else %}
+                                <p>{{ cidade.emoji }} {{ cidade.condicao }} em {{ cidade.nome }}</p>
+                            {% endif %}
                         </div>
 
                         <div class="cidade-footer-meta">

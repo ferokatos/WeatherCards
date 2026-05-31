@@ -71,17 +71,17 @@
                                 <span class="cidade-eyebrow">{{ cidade.grupo_condicao|replace('-', ' ')|title }}</span>
                                 <h2>{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h2>
                                 <div class="insights-inline">
-                                    <span class="risco-badge {{ cidade.insights.risco.classe }}">Risco {{ cidade.insights.risco.label }}</span>
-                                    <span class="tendencia-badge {{ cidade.insights.tendencia.classe }}">
-                                        {{ cidade.insights.tendencia.seta }} {{ cidade.insights.tendencia.label }}
+                                    <span class="risco-badge">{{ cidade.condicao }}</span>
+                                    <span class="tendencia-badge">
+                                        {{ cidade.grupo_condicao|replace('-', ' ')|title }}
                                     </span>
                                 </div>
                             </div>
 
                             <div class="card-header-aside">
-                                <div class="selo-conforto" aria-label="Índice de conforto {{ cidade.insights.indice_conforto }}">
-                                    <small>Conforto</small>
-                                    <strong>{{ cidade.insights.indice_conforto }}</strong>
+                                <div class="selo-conforto" aria-label="Umidade {{ cidade.umidade }}%">
+                                    <small>Umidade</small>
+                                    <strong>{{ cidade.umidade }}%</strong>
                                 </div>
                                 <button
                                     type="button"
@@ -118,17 +118,9 @@
                         </div>
 
                         <div class="card-recomendacao">
-                            <span class="card-recomendacao-label">Recomendação do dia</span>
-                            <p>{{ cidade.insights.recomendacoes[0] }}</p>
+                            <span class="card-recomendacao-label">Condição atual</span>
+                            <p>{{ cidade.emoji }} {{ cidade.condicao }} em {{ cidade.nome }}</p>
                         </div>
-
-                        {% if cidade.insights.recomendacoes|length > 1 %}
-                            <div class="lista-recomendacoes">
-                                {% for recomendacao in cidade.insights.recomendacoes[1:] %}
-                                    <p>• {{ recomendacao }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
 
                         <div class="cidade-footer-meta">
                             <small>Adicionado por: {{ cidade.adicionado_por_nome }}</small>
@@ -181,15 +173,40 @@
         </div>
     {% endif %}
 
+    <!--Formulário de Avaliação-->
+    {% if session.get('usuario_id') and not session.get('ja_avaliou') %}
+    <div style="margin-top: var(--spacing-xl); text-align: center;">
+        <h3>⭐ Avalie o nosso sistema</h3>
+        <p style="color: var(--text-light);">Nos conte como foi a sua experiência</p>
+        <form method="POST" action="{{ url_for('formulario.avaliar') }}">
+            <!--Estrelas-->
+            <div class="estrelas-container">
+                {% for i in [5, 4, 3, 2, 1] %}
+                    <input type="radio" name="estrelas" value="{{ i }}" id="star{{ i }}" required>
+                    <label for="star{{ i }}">★</label>
+                {% endfor %}
+            </div>
+            <div style="margin: 1rem 0;">
+                <textarea name="comentario" placeholder="Deixe um comentário (opcional)" style="width: 50%; padding: 10px; border-radius: 8px;"></textarea>
+            </div>
+            <!--Botão de enviar avaliação-->
+            <button type="submit" class="btn">Enviar Avaliação</button>
+        </form>
+    </div>
+    {% elif session.get('ja_avaliou') %}
+    <div style="margin-top: var(--spacing-xl); text-align: center;">
+        <h3>Obrigado por nos avaliar! 🙌</h3>
+        <p style="color: var(--text-light);">Sua opinião é muito importante para nós.</p>
+    </div>
+    {% endif %}
+
     <script>
         function abrirModalGrafico(modalId, imgSrc) {
             const modal = document.getElementById(modalId);
             const imgExpandida = modal.querySelector('.grafico-expandido');
-
             if (imgExpandida.getAttribute('src') !== imgSrc) {
                 imgExpandida.src = imgSrc;
             }
-
             modal.showModal();
         }
 

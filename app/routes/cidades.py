@@ -141,6 +141,7 @@ def adicionar():
             CIDADES_SALVAS.append(nova_cidade)
             
             flash(f"Cidade {nova_cidade.nome} adicionada com sucesso!", "sucesso")
+            session["pode_avaliar"] = True
             return redirect(url_for("cidades.index"))
             
         except WeatherServiceError as e:
@@ -172,7 +173,7 @@ def refresh_cidades():
         flash(f"{atualizadas} cidade(s) atualizada(s) pela API.", "sucesso")
     if falhas:
         flash(f"{falhas} cidade(s) não puderam ser atualizadas.", "erro")
-
+    session["pode_avaliar"] = True
     return redirect(url_for(
         "cidades.index",
         temperatura=request.form.get("temperatura", "todas"),
@@ -214,7 +215,7 @@ def editar(id):
             cidade.grupo_condicao = normalizar_grupo_condicao(cidade.condicao)
             cidade._registrar_historico()  # registra edição manual no histórico também
             flash("Dados da cidade modificados manualmente.", "sucesso")
-            
+        session["pode_avaliar"] = True   
         return redirect(url_for("cidades.index"))
         
     return render_template("editar.html", cidade=cidade)
@@ -232,7 +233,6 @@ def deletar(id):
         flash(f"A cidade {cidade.nome} foi excluída.", "sucesso")
     else:
         flash("Cidade não encontrada para exclusão.", "erro")
-        
     return redirect(url_for("cidades.index"))
 
 @cidades_bp.route("/cidade/grafico/<int:id>")

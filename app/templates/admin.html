@@ -124,48 +124,6 @@
                     <th>Email</th>
                     <th>Cargo</th>
                 </tr>
-<<<<<<< HEAD
-            {% else %}
-                <tr>
-                    <td colspan="4" style="text-align: center;">Nenhum usuário cadastrado.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    
-    <div style="margin-top: var(--spacing-xl);">
-        <a href="{{ url_for('cidades.index') }}" class="btn">Voltar ao Dashboard</a>
-    </div>
-    <!--Sessão de avaliações-->
-    <div style="margin-top: var(--spacing-xl);">
-        <h2>⭐ Avalições recebidas</h2>
-        <p style="color: var(--text-light);">Feedback enviado pelos Usuários</p>
-    </div>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Estrelas</th>
-                <th>Comentário</th>
-                <th>Usuário</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for avaliacao in avaliacoes %}
-                <tr>
-                    <td>{{ avaliacao.id }}</td>
-                    <td>{{ avaliacao.estrelas }}</td>
-                    <td>{{ avaliacao.comentario }}</td>
-                    <td>{{ avaliacao.usuario_nome }}</td>
-                </tr>
-            {% else %}
-            <tr>
-                <td colspan="4" style="text-align: center;">Nenhuma avaliação recebida.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-=======
             </thead>
             <tbody>
                 {% for usuario in usuarios %}
@@ -189,5 +147,42 @@
             </tbody>
         </table>
     </section>
->>>>>>> 765106850db2fd8ece8b3b6ed22cb611824ce701
+
+    <section class="table-card" style="margin-top: var(--spacing-lg);">
+        <div class="table-card-header">
+            <div>
+                <h3>⭐ Avaliações recebidas</h3>
+                <p class="admin-card-subtitle">Feedback enviado pelos usuários.</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Estrelas</th>
+                    <th>Comentário</th>
+                    <th>Usuário</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for avaliacao in avaliacoes %}
+                    <tr>
+                        <td>{{ avaliacao.id }}</td>
+                        <td>{{ avaliacao.estrelas }}</td>
+                        <td>{{ avaliacao.comentario }}</td>
+                        <td>{{ avaliacao.usuario_nome }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="table-empty">Nenhuma avaliação recebida.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <div style="margin-top: var(--spacing-xl);">
+        <a href="{{ url_for('cidades.index') }}" class="btn">Voltar ao Dashboard</a>
+    </div>
 {% endblock %}

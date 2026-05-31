@@ -1,34 +1,130 @@
 {% extends "base.html" %}
 
 {% block conteudo %}
-    <div style="margin-bottom: var(--spacing-lg);">
-        <h2>Painel de Controle Admin</h2>
-        <p style="color: var(--text-light);">Gerenciamento dos Usuários Registrados</p>
+    <section class="page-hero admin-hero">
+        <div class="page-hero-copy">
+            <span class="hero-kicker">Controle operacional</span>
+            <h1 class="hero-title">Painel administrativo do WeatherCards</h1>
+            <p class="hero-subtitle">Acompanhe o ranking climático, a evolução média do conforto e a gestão de acessos do sistema.</p>
+        </div>
+        <div class="page-hero-side">
+            <div class="hero-stat">
+                <small>Usuários cadastrados</small>
+                <strong>{{ usuarios|length }}</strong>
+            </div>
+            <div class="hero-stat">
+                <small>Cidades em ranking</small>
+                <strong>{{ painel_climatico.mais_confortaveis|length }}</strong>
+            </div>
+            <a href="{{ url_for('cidades.index') }}" class="btn btn-outline">Voltar ao Dashboard</a>
+        </div>
+    </section>
+
+    <div class="admin-clima-grid">
+        <section class="admin-card-clima">
+            <div class="admin-card-header">
+                <h3>Top 5 Mais Confortáveis</h3>
+                <span class="admin-card-kicker">Agora</span>
+            </div>
+
+            <ol class="ranking-lista">
+                {% for cidade in painel_climatico.mais_confortaveis %}
+                    <li>
+                        <div>
+                            <strong>{{ cidade.nome }}, {{ cidade.pais }}</strong>
+                            <small>{{ cidade.condicao }}</small>
+                        </div>
+                        <span class="ranking-score">{{ cidade.insights.indice_conforto }}</span>
+                    </li>
+                {% else %}
+                    <li class="ranking-vazio">Nenhuma cidade disponível.</li>
+                {% endfor %}
+            </ol>
+        </section>
+
+        <section class="admin-card-clima">
+            <div class="admin-card-header">
+                <h3>Top 5 Maior Risco</h3>
+                <span class="admin-card-kicker">Agora</span>
+            </div>
+
+            <ol class="ranking-lista ranking-risco-lista">
+                {% for cidade in painel_climatico.maior_risco %}
+                    <li>
+                        <div>
+                            <strong>{{ cidade.nome }}, {{ cidade.pais }}</strong>
+                            <small>{{ cidade.insights.risco.label }} · {{ cidade.insights.tendencia.label }}</small>
+                        </div>
+                        <span class="risco-badge {{ cidade.insights.risco.classe }}">{{ cidade.insights.risco.label }}</span>
+                    </li>
+                {% else %}
+                    <li class="ranking-vazio">Nenhuma cidade disponível.</li>
+                {% endfor %}
+            </ol>
+        </section>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Cargo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for usuario in usuarios %}
+    <section class="admin-card-clima admin-card-evolucao">
+        <div class="admin-card-header">
+            <div>
+                <h3>Evolução Média do Índice</h3>
+                <p class="admin-card-subtitle">Últimas atualizações consolidadas em memória</p>
+            </div>
+            <div class="evolucao-destaque">
+                <strong>{{ painel_climatico.evolucao_media.media_atual if painel_climatico.evolucao_media.media_atual is not none else '--' }}</strong>
+                <span class="{{ 'tendencia-melhorando' if painel_climatico.evolucao_media.variacao > 0 else 'tendencia-piorando' if painel_climatico.evolucao_media.variacao < 0 else 'tendencia-estavel' }}">
+                    {% if painel_climatico.evolucao_media.variacao > 0 %}
+                        ↑ +{{ painel_climatico.evolucao_media.variacao }}
+                    {% elif painel_climatico.evolucao_media.variacao < 0 %}
+                        ↓ {{ painel_climatico.evolucao_media.variacao }}
+                    {% else %}
+                        → 0.0
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        {% if painel_climatico.evolucao_media.sparkline_points %}
+            <div class="sparkline-box">
+                <svg viewBox="0 0 100 42" preserveAspectRatio="none" class="sparkline-svg" aria-label="Evolução média do índice de conforto">
+                    <polyline
+                        fill="none"
+                        stroke="var(--primary-color)"
+                        stroke-width="3"
+                        points="{{ painel_climatico.evolucao_media.sparkline_points|join(' ') }}"
+                    ></polyline>
+                    {% for ponto in painel_climatico.evolucao_media.sparkline_points %}
+                        {% set coords = ponto.split(',') %}
+                        <circle cx="{{ coords[0] }}" cy="{{ coords[1] }}" r="1.8" fill="var(--secondary-color)"></circle>
+                    {% endfor %}
+                </svg>
+                <div class="sparkline-legenda">
+                    <span>Mais antiga</span>
+                    <span>Atual</span>
+                </div>
+            </div>
+        {% else %}
+            <p class="admin-card-subtitle">Ainda não há histórico suficiente para mostrar evolução média.</p>
+        {% endif %}
+    </section>
+
+    <section class="table-card">
+        <div class="table-card-header">
+            <div>
+                <h3>Usuários registrados</h3>
+                <p class="admin-card-subtitle">Visão rápida dos perfis ativos no ambiente em memória.</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ usuario.id }}</td>
-                    <td>{{ usuario.nome }}</td>
-                    <td>{{ usuario.email }}</td>
-                    <td>
-                        {% if usuario.cargo == 'admin' %}
-                            <span style="color: var(--danger-color); font-weight: bold;">{{ usuario.cargo | upper }}</span>
-                        {% else %}
-                            <span style="color: var(--primary-color);">{{ usuario.cargo | upper }}</span>
-                        {% endif %}
-                    </td>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Cargo</th>
                 </tr>
+<<<<<<< HEAD
             {% else %}
                 <tr>
                     <td colspan="4" style="text-align: center;">Nenhum usuário cadastrado.</td>
@@ -69,4 +165,29 @@
             {% endfor %}
         </tbody>
     </table>
+=======
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                    <tr>
+                        <td>{{ usuario.id }}</td>
+                        <td>{{ usuario.nome }}</td>
+                        <td>{{ usuario.email }}</td>
+                        <td>
+                            {% if usuario.cargo == 'admin' %}
+                                <span class="risco-badge risco-alto">{{ usuario.cargo | upper }}</span>
+                            {% else %}
+                                <span class="ranking-score">{{ usuario.cargo | upper }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="table-empty">Nenhum usuário cadastrado.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+>>>>>>> 765106850db2fd8ece8b3b6ed22cb611824ce701
 {% endblock %}

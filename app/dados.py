@@ -28,6 +28,42 @@ class UsuarioAdmin(Usuario_padrao):
         super().__init__(nome,email,senha)
         self.cargo = "admin"
 
+
+def buscar_usuario_por_email(email):
+    """Retorna um usuário já cadastrado pelo email."""
+    for usuario in Usuario_padrao.USUARIOS:
+        if usuario.email == email:
+            return usuario
+    return None
+
+
+def popular_usuarios_padrao():
+    """Cria usuários padrão em memória sem duplicar registros existentes."""
+    usuarios_iniciais = [
+        {
+            "nome": "Admin",
+            "email": "admin@weathercards.local",
+            "senha": "admin1234",
+            "classe": UsuarioAdmin,
+        },
+        {
+            "nome": "Usuario",
+            "email": "usuario@weathercards.local",
+            "senha": "usuario123",
+            "classe": Usuario_padrao,
+        },
+    ]
+
+    for dados_usuario in usuarios_iniciais:
+        if buscar_usuario_por_email(dados_usuario["email"]):
+            continue
+
+        dados_usuario["classe"](
+            dados_usuario["nome"],
+            dados_usuario["email"],
+            dados_usuario["senha"],
+        )
+
 #!--------------------------------------------------------------------------------
 #!                              CIDADES(descrições)
 #!--------------------------------------------------------------------------------
@@ -65,6 +101,8 @@ class Cidades:
             "temp_max": self.temp_max,
             "umidade": self.umidade,
             "vento": self.vento,
+            "condicao": self.condicao,
+            "grupo_condicao": self.grupo_condicao,
         })
 
     def atualizar_clima(self, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str):

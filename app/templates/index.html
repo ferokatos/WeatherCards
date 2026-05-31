@@ -71,9 +71,7 @@
                                 <span class="cidade-eyebrow">{{ cidade.grupo_condicao|replace('-', ' ')|title }}</span>
                                 <h2>{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h2>
                                 <div class="insights-inline">
-                                    <!-- substituído cidade.insights.risco por condicao -->
                                     <span class="risco-badge">{{ cidade.condicao }}</span>
-                                    <!-- substituído cidade.insights.tendencia por grupo_condicao -->
                                     <span class="tendencia-badge">
                                         {{ cidade.grupo_condicao|replace('-', ' ')|title }}
                                     </span>
@@ -81,7 +79,6 @@
                             </div>
 
                             <div class="card-header-aside">
-                                <!-- substituído cidade.insights.indice_conforto por umidade -->
                                 <div class="selo-conforto" aria-label="Umidade {{ cidade.umidade }}%">
                                     <small>Umidade</small>
                                     <strong>{{ cidade.umidade }}%</strong>
@@ -120,7 +117,6 @@
                             </div>
                         </div>
 
-                        <!-- substituído cidade.insights.recomendacoes por condicao -->
                         <div class="card-recomendacao">
                             <span class="card-recomendacao-label">Condição atual</span>
                             <p>{{ cidade.emoji }} {{ cidade.condicao }} em {{ cidade.nome }}</p>

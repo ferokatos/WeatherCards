@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, session, flash
 from app.dados import Usuario_padrao, Formulario
+from app.dados import CIDADES_SALVAS
+from app.services.inteligencia_climatica import montar_painel_admin
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -12,4 +14,5 @@ def painel():
 
     usuarios = Usuario_padrao.USUARIOS
     avaliacoes = Formulario.Lista_de_formularios
-    return render_template("admin.html", usuarios=usuarios, avaliacoes=avaliacoes)
+    painel_climatico = montar_painel_admin(CIDADES_SALVAS)
+    return render_template("admin.html", usuarios=usuarios, avaliacoes=avaliacoes, painel_climatico=painel_climatico)

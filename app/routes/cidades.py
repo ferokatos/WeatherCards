@@ -292,3 +292,51 @@ def grafico(id):
     buf.seek(0)
 
     return send_file(buf, mimetype='image/png')
+@cidades_bp.route("/cidade/<int:id>/comentar", methods=["POST"])
+def comentar(id):
+    """Qualquer usuário logado pode comentar em qualquer cidade."""
+    if not usuario_logado():
+        return redirect(url_for("auth.login"))
+
+    cidade = buscar_cidade_por_id(id)
+    if not cidade:
+        return redirect(url_for("cidades.index"))
+
+    texto = request.form.get("texto", "").strip()
+    if not texto:
+        return redirect(url_for("cidades.index"))
+
+    import app.dados as dados
+    comentario = {
+        "id": dados.proximo_comentario_id,
+        "autor": session.get("usuario_nome"),
+        "cargo": session.get("cargo"),
+        "texto": texto,
+        "hora": datetime.now().strftime("%d/%m/%Y %H:%M")
+    }
+    dados.proximo_comentario_id += 1
+    cidade.comentarios.append(comentario)
+
+    return redirect(url_for("cidades.index"))
+
+
+@cidades_bp.route("/cidade/<int:id>/comentario/<int:cid>/deletar", methods=["POST"])
+def deletar_comentario(id, cid):
+    """Admin deleta qualquer comentário. Usuário comum deleta só os seus."""
+    if not usuario_logado():
+        return redirect(url_for("auth.login"))
+
+    cidade = buscar_cidade_por_id(id)
+    if not cidade:
+        return redirect(url_for("cidades.index"))
+
+    comentario = next((c for c in cidade.comentarios if c["id"] == cid), None)
+    if comentario:
+        pode_deletar = (
+            session.get("cargo") == "admin"
+            or comentario["autor"] == session.get("usuario_nome")
+        )
+        if pode_deletar:
+            cidade.comentarios.remove(comentario)
+
+    return redirect(url_for("cidades.index"))

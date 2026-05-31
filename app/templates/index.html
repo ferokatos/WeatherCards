@@ -144,7 +144,40 @@
                                 </form>
                             {% endif %}
                         </div>
+                        <!-- Seção de comentários -->
+                        <div class="comentarios">
+                            <h4>💬 Comentários</h4>
 
+                            {% if cidade.comentarios %}
+                                {% for c in cidade.comentarios %}
+                                <div class="comentario">
+                                    <div class="comentario-header">
+                                        <strong>{{ c.autor }}</strong>
+                                        {% if c.cargo == 'admin' %}
+                                            <span class="badge-admin">admin</span>
+                                        {% endif %}
+                                        <span class="comentario-hora">· {{ c.hora }}</span>
+                                    </div>
+                                    <p class="comentario-texto">{{ c.texto }}</p>
+                                    {% if session.get('cargo') == 'admin' or session.get('usuario_nome') == c.autor %}
+                                    <form action="{{ url_for('cidades.deletar_comentario', id=cidade.id, cid=c.id) }}" method="POST">
+                                        <button type="submit" class="btn-deletar-comentario"
+                                            onclick="return confirm('Deletar este comentário?')">
+                                            🗑️ Deletar
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="sem-comentarios">Nenhum comentário ainda. Seja o primeiro!</p>
+                            {% endif %}
+
+                            <form action="{{ url_for('cidades.comentar', id=cidade.id) }}" method="POST" class="form-comentario">
+                                <input type="text" name="texto" placeholder="Deixe um comentário sobre o clima aqui..." maxlength="200" required>
+                                <button type="submit">Enviar</button>
+                            </form>
+                        </div>
                         <dialog id="modal-{{ cidade.id }}" class="modal-grafico" onclick="fecharModalSeClicarFora(event, this)">
                             <div class="modal-content">
                                 <div class="modal-header">

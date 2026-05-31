@@ -89,6 +89,7 @@ class Cidades:
 
         # Histórico de leituras climáticas para o gráfico
         self.historico = []
+        self.comentarios = []
         self._registrar_historico()
 
     def _registrar_historico(self):
@@ -207,7 +208,8 @@ class Formulario:
         Formulario.numero_do_formulario +=1
         Formulario.Lista_de_formularios.append(self)
 
-
+# Contador global de IDs de comentários
+proximo_comentario_id = 1  
 
 #!Teste local
 if __name__ == "__main__":

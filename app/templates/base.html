@@ -34,6 +34,7 @@
                     <div class="nav-links">
                         <a href="{{ url_for('cidades.index') }}">Dashboard</a>
                         <a href="{{ url_for('cidades.adicionar') }}">Adicionar Cidade</a>
+                        <a href="{{ url_for('cidades.mudanca_climatica') }}">🌍 Mudança Climática</a>
                         {% if session.get('cargo') == 'admin' %}
                             <a href="{{ url_for('admin.painel') }}">Painel Admin</a>
                         {% endif %}

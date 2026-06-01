@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block titulo %}Detalhes Climáticos{% endblock %}
+
+{% block conteudo %}
+
+    <section class="page-hero details-hero">
+        <div class="page-hero-copy">
+            <span class="hero-kicker">Visão de risco por cidade</span>
+            <h1 class="hero-title">{{ cidade.emoji }} {{ cidade.nome }}, {{ cidade.pais }}</h1>
+            <p class="hero-subtitle">
+                Previsão para o próximo dia, leitura de alertas de eventos climáticos e visualização da área potencialmente afetada.
+            </p>
+            <div class="details-hero-actions">
+                <a href="{{ url_for('cidades.index') }}" class="btn btn-outline">Voltar ao Dashboard</a>
+            </div>
+        </div>
+
+        <div class="page-hero-side">
+            <div class="hero-stat">
+                <small>Previsão de referência</small>
+                <strong>{{ previsao.data_label }}</strong>
+            </div>
+            <div class="hero-stat">
+                <small>Condição esperada</small>
+                <strong>{{ previsao.emoji }} {{ previsao.condicao }}</strong>
+            </div>
+            <div class="hero-stat">
+                <small>Área monitorada</small>
+                <strong>Raio de {{ raio_afetado_km }} km</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="details-grid">
+        <article class="surface-panel details-card">
+            <header class="details-card-header">
+                <div>
+                    <span class="card-recomendacao-label">Previsão do próximo dia</span>
+                    <h2>Janela estimada para {{ previsao.data_label }}</h2>
+                </div>
+                <span class="risco-badge">{{ previsao.grupo_condicao|replace('-', ' ')|title }}</span>
+            </header>
+
+            <div class="details-temp-band">
+                <strong>{{ previsao.temperatura if previsao.temperatura is not none else '--' }}°C</strong>
+                <small>{{ previsao.emoji }} {{ previsao.condicao }}</small>
+            </div>
+
+            <div class="details-metric-grid">
+                <div class="metrica-clima">
+                    <small>Mínima</small>
+                    <strong>{{ previsao.temp_min if previsao.temp_min is not none else '--' }}°C</strong>
+                </div>
+                <div class="metrica-clima">
+                    <small>Máxima</small>
+                    <strong>{{ previsao.temp_max if previsao.temp_max is not none else '--' }}°C</strong>
+                </div>
+                <div class="metrica-clima">
+                    <small>Umidade</small>
+                    <strong>{{ previsao.umidade if previsao.umidade is not none else '--' }}%</strong>
+                </div>
+                <div class="metrica-clima">
+                    <small>Vento</small>
+                    <strong>{{ previsao.vento if previsao.vento is not none else '--' }} km/h</strong>
+                </div>
+                <div class="metrica-clima metrica-larga">
+                    <small>Probabilidade de chuva</small>
+                    <strong>{{ previsao.chuva_prob }}%</strong>
+                </div>
+            </div>
+        </article>
+
+        <article class="surface-panel details-card mapa-card">
+            <header class="details-card-header">
+                <div>
+                    <span class="card-recomendacao-label">Mapa da área afetada</span>
+                    <h2>Recorte operacional da cidade</h2>
+                </div>
+            </header>
+
+            {% if mapa_config %}
+                <div class="mapa-embed-wrapper">
+                    <div
+                        id="mapa-afetado"
+                        aria-label="Mapa da área potencialmente afetada em {{ cidade.nome }}"
+                        data-lat="{{ mapa_config.lat }}"
+                        data-lon="{{ mapa_config.lon }}"
+                        data-raio="{{ mapa_config.raio_metros }}"
+                        data-cor-linha="{{ mapa_config.cor_linha }}"
+                        data-cor-preenchimento="{{ mapa_config.cor_preenchimento }}"
+                        data-opacidade-preenchimento="{{ mapa_config.opacidade_preenchimento }}"
+                        data-nivel="{{ mapa_config.nivel }}"
+                        data-cidade="{{ cidade.nome }}"
+                    ></div>
+                </div>
+                <p class="mapa-legenda">
+                    Área do evento climático demarcada com contorno colorido (nível {{ mapa_config.nivel }}),
+                    com raio aproximado de {{ raio_afetado_km }} km.
+                </p>
+            {% else %}
+                <p class="empty-state-text">Não foi possível gerar o mapa para esta cidade neste momento.</p>
+            {% endif %}
+        </article>
+
+        <article class="surface-panel details-card alertas-card">
+            <header class="details-card-header">
+                <div>
+                    <span class="card-recomendacao-label">Alertas de eventos</span>
+                    <h2>Eventos climáticos previstos para {{ cidade.nome }}</h2>
+                </div>
+            </header>
+
+            <div class="alertas-lista">
+                {% for alerta in alertas %}
+                    <article class="alerta-evento alerta-evento-{{ alerta.nivel }}">
+                        <div class="alerta-evento-header">
+                            <h3>{{ alerta.titulo }}</h3>
+                            <span class="alerta-tag">Nível {{ alerta.nivel|title }}</span>
+                        </div>
+                        <p>{{ alerta.descricao }}</p>
+                        <small>{{ alerta.impacto }}</small>
+                    </article>
+                {% endfor %}
+            </div>
+        </article>
+    </section>
+
+    {% if mapa_config %}
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        >
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+        <script>
+            (function () {
+                const mapaEl = document.getElementById('mapa-afetado');
+                if (!mapaEl || typeof L === 'undefined') {
+                    return;
+                }
+
+                const config = {
+                    lat: Number.parseFloat(mapaEl.dataset.lat),
+                    lon: Number.parseFloat(mapaEl.dataset.lon),
+                    raio: Number.parseInt(mapaEl.dataset.raio, 10),
+                    corLinha: mapaEl.dataset.corLinha,
+                    corPreenchimento: mapaEl.dataset.corPreenchimento,
+                    opacidadePreenchimento: Number.parseFloat(mapaEl.dataset.opacidadePreenchimento),
+                    nivel: mapaEl.dataset.nivel,
+                    cidade: mapaEl.dataset.cidade
+                };
+
+                const mapa = L.map(mapaEl, {
+                    zoomControl: true,
+                    scrollWheelZoom: false
+                }).setView([config.lat, config.lon], 10);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(mapa);
+
+                L.circle([config.lat, config.lon], {
+                    radius: config.raio,
+                    color: config.corLinha,
+                    fillColor: config.corPreenchimento,
+                    fillOpacity: config.opacidadePreenchimento,
+                    weight: 3,
+                    dashArray: '8 6'
+                }).addTo(mapa).bindPopup(
+                    'Área prevista do evento climático. Nível: ' + config.nivel
+                );
+
+                L.marker([config.lat, config.lon]).addTo(mapa).bindPopup(
+                    config.cidade
+                );
+            })();
+        </script>
+    {% endif %}
+
+{% endblock %}

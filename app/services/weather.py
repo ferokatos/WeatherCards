@@ -8,7 +8,7 @@ import requests
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
-API_KEY = os.getenv("OPENWEATHER_API_KEY", "2a79b1d791ec76bc0c714a36401ed402")
+API_KEY = os.getenv("OPENWEATHER_API_KEY")
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 DEFAULT_UNITS = "metric"
 DEFAULT_LANG = "pt_br"
@@ -105,6 +105,9 @@ def buscar_clima(cidade):
     condicao = weather_info.get("description") or "" 
     nome = data.get("name") or cidade
     pais = data.get("sys", {}).get("country") or ""
+    coord = data.get("coord", {})
+    lat = coord.get("lat")
+    lon = coord.get("lon")
     grupo_condicao = normalizar_grupo_condicao(condicao)
 
     return {
@@ -118,6 +121,8 @@ def buscar_clima(cidade):
         "condicao": condicao.capitalize(),
         "grupo_condicao": grupo_condicao,
         "emoji": get_emoji(condicao),
+        "lat": round(lat, 4) if isinstance(lat, (int, float)) else None,
+        "lon": round(lon, 4) if isinstance(lon, (int, float)) else None,
     }
 
 

@@ -1,9 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file, abort
 from app.dados import Cidades, CIDADES_SALVAS, buscar_cidade_por_id
 from app.services.filtros_cidades import FILTRO_CONDICAO_OPCOES, filtrar_cidades
+from app.services.inteligencia_climatica import enriquecer_cidades
 from app.services.weather import buscar_clima, WeatherServiceError, normalizar_grupo_condicao
 from app.services.risco_climatico import agrupar_cidades_por_risco, NIVEIS_RISCO
+from app.services.previsao_alertas import buscar_previsao_proximo_dia, gerar_alertas_eventos, montar_config_mapa_alerta
+from datetime import datetime, timedelta
 import io
+import random
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')  # necessário para rodar sem interface gráfica no servidor
@@ -33,8 +37,56 @@ def atualizar_cidade_com_dados_api(cidade):
         vento=dados_clima["vento"],
         condicao=dados_clima["condicao"],
         grupo_condicao=dados_clima["grupo_condicao"],
-        emoji=dados_clima["emoji"]
+        emoji=dados_clima["emoji"],
+        lat=dados_clima["lat"],
+        lon=dados_clima["lon"],
     )
+
+
+def preparar_historico_para_grafico(cidade):
+    """Expande um histórico muito curto para uma janela visual mais útil."""
+    historico = [registro.copy() for registro in cidade.historico]
+
+    if not historico:
+        return []
+
+    historico.sort(key=lambda registro: registro["data"])
+
+    if len(historico) == 1:
+        return gerar_historico_simulado(cidade, historico[-1], quantidade=6, intervalo_horas=4)
+
+    intervalo_total = historico[-1]["data"] - historico[0]["data"]
+    if len(historico) < 6 or intervalo_total < timedelta(hours=6):
+        return gerar_historico_simulado(cidade, historico[-1], quantidade=6, intervalo_horas=4)
+
+    return historico
+
+
+def gerar_historico_simulado(cidade, referencia, quantidade=6, intervalo_horas=4):
+    """Gera pontos auxiliares para o gráfico quando a coleta real ainda é muito recente."""
+    base_temperatura = referencia.get("temperatura", cidade.temperatura)
+    base_umidade = referencia.get("umidade", cidade.umidade)
+    base_vento = referencia.get("vento", cidade.vento)
+    momento_final = referencia.get("data", datetime.now())
+
+    historico_simulado = []
+    for indice in range(quantidade, 0, -1):
+        fator = indice / quantidade
+        historico_simulado.append({
+            "data": momento_final - timedelta(hours=indice * intervalo_horas),
+            "temperatura": round(base_temperatura + random.uniform(-2.4, 2.4) * fator, 1),
+            "umidade": round(max(0, min(100, base_umidade + random.uniform(-8, 8) * fator)), 1),
+            "vento": round(max(0, base_vento + random.uniform(-2.5, 2.5) * fator), 1),
+        })
+
+    historico_simulado.append({
+        "data": momento_final,
+        "temperatura": base_temperatura,
+        "umidade": base_umidade,
+        "vento": base_vento,
+    })
+
+    return historico_simulado
 
 @cidades_bp.route("/")
 def index():
@@ -54,10 +106,11 @@ def index():
 
     # Inverte a lista para mostrar da mais nova para a mais antiga
     cidades_filtradas = cidades_filtradas[::-1]
+    cidades_dashboard = enriquecer_cidades(cidades_filtradas)
 
     return render_template(
         "index.html",
-        cidades=cidades_filtradas,
+        cidades=cidades_dashboard,
         filtro_temperatura=filtro_temperatura,
         filtro_condicao=filtro_condicao,
         filtros_temperatura=FILTRO_TEMPERATURA_OPCOES,
@@ -86,12 +139,15 @@ def adicionar():
                 condicao=dados_clima["condicao"],
                 grupo_condicao=dados_clima["grupo_condicao"],
                 emoji=dados_clima["emoji"],
+                lat=dados_clima["lat"],
+                lon=dados_clima["lon"],
                 adicionado_por_id=session.get("usuario_id"),
                 adicionado_por_nome=session.get("usuario_nome")
             )
             CIDADES_SALVAS.append(nova_cidade)
             
             flash(f"Cidade {nova_cidade.nome} adicionada com sucesso!", "sucesso")
+            session["pode_avaliar"] = True
             return redirect(url_for("cidades.index"))
             
         except WeatherServiceError as e:
@@ -123,7 +179,7 @@ def refresh_cidades():
         flash(f"{atualizadas} cidade(s) atualizada(s) pela API.", "sucesso")
     if falhas:
         flash(f"{falhas} cidade(s) não puderam ser atualizadas.", "erro")
-
+    session["pode_avaliar"] = True
     return redirect(url_for(
         "cidades.index",
         temperatura=request.form.get("temperatura", "todas"),
@@ -165,7 +221,7 @@ def editar(id):
             cidade.grupo_condicao = normalizar_grupo_condicao(cidade.condicao)
             cidade._registrar_historico()  # registra edição manual no histórico também
             flash("Dados da cidade modificados manualmente.", "sucesso")
-            
+        session["pode_avaliar"] = True   
         return redirect(url_for("cidades.index"))
         
     return render_template("editar.html", cidade=cidade)
@@ -183,8 +239,61 @@ def deletar(id):
         flash(f"A cidade {cidade.nome} foi excluída.", "sucesso")
     else:
         flash("Cidade não encontrada para exclusão.", "erro")
-        
     return redirect(url_for("cidades.index"))
+
+
+@cidades_bp.route("/cidade/detalhes/<int:id>")
+def detalhes(id):
+    """Exibe previsão do próximo dia, alertas e área afetada no mapa."""
+    if not usuario_logado():
+        return redirect(url_for("auth.login"))
+
+    cidade = buscar_cidade_por_id(id)
+    if not cidade:
+        flash("Cidade não encontrada.", "erro")
+        return redirect(url_for("cidades.index"))
+
+    lat = getattr(cidade, "lat", None)
+    lon = getattr(cidade, "lon", None)
+
+    try:
+        previsao = buscar_previsao_proximo_dia(
+            nome_cidade=f"{cidade.nome},{cidade.pais}" if cidade.pais else cidade.nome,
+            lat=lat,
+            lon=lon,
+        )
+    except WeatherServiceError:
+        previsao = {
+            "data_label": "Amanhã",
+            "temperatura": cidade.temperatura,
+            "temp_min": cidade.temp_min,
+            "temp_max": cidade.temp_max,
+            "umidade": cidade.umidade,
+            "vento": cidade.vento,
+            "chuva_prob": 35,
+            "condicao": cidade.condicao,
+            "grupo_condicao": cidade.grupo_condicao,
+            "emoji": cidade.emoji,
+            "lat": lat,
+            "lon": lon,
+        }
+
+    if lat is None:
+        lat = previsao.get("lat")
+    if lon is None:
+        lon = previsao.get("lon")
+
+    alertas, raio_afetado_km = gerar_alertas_eventos(previsao)
+    mapa_config = montar_config_mapa_alerta(lat, lon, raio_afetado_km, alertas)
+
+    return render_template(
+        "details.html",
+        cidade=cidade,
+        previsao=previsao,
+        alertas=alertas,
+        raio_afetado_km=raio_afetado_km,
+        mapa_config=mapa_config,
+    )
 
 @cidades_bp.route("/cidade/grafico/<int:id>")
 def grafico(id):
@@ -197,23 +306,7 @@ def grafico(id):
     if not cidade:
         abort(404)
 
-    # Se ainda não tem histórico suficiente, simula os últimos 10 minutos
-    from datetime import datetime, timedelta
-    import random
-
-    historico = cidade.historico.copy()
-
-    if len(historico) < 2:
-        agora = datetime.now()
-        # Gera 6 pontos nos últimos 10 minutos com pequenas variações
-        for i in range(5, 0, -1):
-            momento = agora - timedelta(minutes=i * 2)
-            historico.insert(0, {
-                "data": momento,
-                "temperatura": round(cidade.temperatura + random.uniform(-1.5, 1.5), 1),
-                "umidade":     round(cidade.umidade     + random.uniform(-3, 3), 1),
-                "vento":       round(max(0, cidade.vento + random.uniform(-1, 1)), 1),
-            })
+    historico = preparar_historico_para_grafico(cidade)
 
     # Monta o DataFrame com o histórico (real ou simulado)
     df = pd.DataFrame(historico)

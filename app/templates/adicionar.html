@@ -1,20 +1,40 @@
 {% extends "base.html" %}
 
 {% block conteudo %}
-    <div class="form-container">
-        <h2 style="text-align: center; margin-bottom: var(--spacing-lg);">Adicionar Cidade</h2>
-        
-        <form method="POST" action="{{ url_for('cidades.adicionar') }}">
-            <div class="form-group">
-                <label for="cidade">Nome da Cidade</label>
-                <input type="text" id="cidade" name="cidade" required placeholder="Ex: Maceió">
-            </div>
-            
-            <button type="submit" class="btn" style="width: 100%;">Buscar e Salvar</button>
-        </form>
-        
-        <div style="text-align: center; margin-top: var(--spacing-md);">
-            <a href="{{ url_for('cidades.index') }}" style="color: var(--primary-color);">Voltar ao Dashboard</a>
+    <section class="page-hero compact-hero">
+        <div class="page-hero-copy">
+            <span class="hero-kicker">Amplie o monitoramento</span>
+            <h1 class="hero-title">Adicionar uma nova cidade ao radar</h1>
+            <p class="hero-subtitle">Busque a leitura atual da API e inclua a cidade no fluxo de inteligência climática.</p>
         </div>
-    </div>
+    </section>
+
+    <section class="form-page-grid">
+        <aside class="info-panel">
+            <span class="hero-kicker">Como funciona</span>
+            <h3>Entrada simples, saída rica</h3>
+            <p>Depois do cadastro, a cidade já entra no dashboard com conforto, risco, tendência e recomendações automáticas.</p>
+        </aside>
+
+        <div class="form-container form-card-wide">
+            <div class="form-heading">
+                <span class="hero-kicker">Cadastro de cidade</span>
+                <h2>Adicionar Cidade</h2>
+                <p>Use nome simples ou cidade com país, como <strong>Maceió,BR</strong>.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('cidades.adicionar') }}">
+                <div class="form-group">
+                    <label for="cidade">Nome da Cidade</label>
+                    <input type="text" id="cidade" name="cidade" required placeholder="Ex: Maceió">
+                </div>
+
+                <button type="submit" class="btn btn-block">Buscar e Salvar</button>
+            </form>
+
+            <p class="form-helper-text">
+                <a href="{{ url_for('cidades.index') }}">Voltar ao Dashboard</a>
+            </p>
+        </div>
+    </section>
 {% endblock %}

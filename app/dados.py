@@ -14,6 +14,7 @@ class Usuario_padrao:
         self.senha = senha
         self.id =Usuario_padrao.ID_atual
         self.cargo = "padrão"
+        self.ja_avaliou = False
         Usuario_padrao.ID_atual += 1
         Usuario_padrao.USUARIOS.append(self)
 
@@ -27,6 +28,42 @@ class UsuarioAdmin(Usuario_padrao):
         super().__init__(nome,email,senha)
         self.cargo = "admin"
 
+
+def buscar_usuario_por_email(email):
+    """Retorna um usuário já cadastrado pelo email."""
+    for usuario in Usuario_padrao.USUARIOS:
+        if usuario.email == email:
+            return usuario
+    return None
+
+
+def popular_usuarios_padrao():
+    """Cria usuários padrão em memória sem duplicar registros existentes."""
+    usuarios_iniciais = [
+        {
+            "nome": "Admin",
+            "email": "admin@weathercards.local",
+            "senha": "admin1234",
+            "classe": UsuarioAdmin,
+        },
+        {
+            "nome": "Usuario",
+            "email": "usuario@weathercards.local",
+            "senha": "usuario123",
+            "classe": Usuario_padrao,
+        },
+    ]
+
+    for dados_usuario in usuarios_iniciais:
+        if buscar_usuario_por_email(dados_usuario["email"]):
+            continue
+
+        dados_usuario["classe"](
+            dados_usuario["nome"],
+            dados_usuario["email"],
+            dados_usuario["senha"],
+        )
+
 #!--------------------------------------------------------------------------------
 #!                              CIDADES(descrições)
 #!--------------------------------------------------------------------------------
@@ -34,7 +71,7 @@ class UsuarioAdmin(Usuario_padrao):
 #? Classe de cidades irá receber os dados da API, criando assim um flash_card
 class Cidades:
     ID_atual = 1
-    def __init__(self, nome:str, pais:str, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str, adicionado_por_id:int, adicionado_por_nome:str):
+    def __init__(self, nome:str, pais:str, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str, adicionado_por_id:int, adicionado_por_nome:str, lat:float=None, lon:float=None):
         self.nome = nome
         self.pais = pais
         self.temperatura = temperatura
@@ -45,6 +82,8 @@ class Cidades:
         self.condicao = condicao
         self.grupo_condicao = grupo_condicao
         self.emoji = emoji
+        self.lat = lat
+        self.lon = lon
         self.adicionado_por_id = adicionado_por_id
         self.adicionado_por_nome = adicionado_por_nome
         self.id = Cidades.ID_atual
@@ -64,9 +103,11 @@ class Cidades:
             "temp_max": self.temp_max,
             "umidade": self.umidade,
             "vento": self.vento,
+            "condicao": self.condicao,
+            "grupo_condicao": self.grupo_condicao,
         })
 
-    def atualizar_clima(self, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str):
+    def atualizar_clima(self, temperatura:float, temp_min:float, temp_max:float, umidade:float, vento:float, condicao:str, grupo_condicao:str, emoji:str, lat:float=None, lon:float=None):
         """Atualiza os dados de clima da cidade mantendo quem adicionou intacto"""
         self.temperatura = temperatura
         self.temp_min = temp_min
@@ -76,6 +117,10 @@ class Cidades:
         self.condicao = condicao
         self.grupo_condicao = grupo_condicao
         self.emoji = emoji
+        if lat is not None:
+            self.lat = lat
+        if lon is not None:
+            self.lon = lon
         self._registrar_historico()  # registra cada atualização no histórico
 
 def buscar_cidade_por_id(cidade_id):
@@ -141,6 +186,8 @@ def popular_cidades_padrao():
                 condicao=dados["condicao"],
                 grupo_condicao=dados["grupo_condicao"],
                 emoji=dados["emoji"],
+                lat=dados["lat"],
+                lon=dados["lon"],
                 adicionado_por_id=0,           # 0 = sistema
                 adicionado_por_nome="Sistema"
             )
@@ -150,6 +197,24 @@ def popular_cidades_padrao():
             print(f"❌ Erro ao carregar {nome}")
         except Exception as e:
             print(f"❌ Erro inesperado em {nome}: {e}")
+
+
+#!------------------------------------------------------------------
+#!                          Classe de formulário
+#!------------------------------------------------------------------
+
+class Formulario:
+    numero_do_formulario = 1
+    Lista_de_formularios = []
+    def __init__(self,estrelas:int =None,comentario:str ="Nada",usuario=None):
+        self.estrelas = estrelas
+        self.comentario = comentario
+        self.usuario_nome = usuario.nome
+        self.usuario_id = usuario.id
+        self.id = self.numero_do_formulario
+        Formulario.numero_do_formulario +=1
+        Formulario.Lista_de_formularios.append(self)
+
 
 
 #!Teste local

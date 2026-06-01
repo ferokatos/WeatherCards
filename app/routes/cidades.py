@@ -3,6 +3,7 @@ from app.dados import Cidades, CIDADES_SALVAS, buscar_cidade_por_id
 from app.services.filtros_cidades import FILTRO_CONDICAO_OPCOES, filtrar_cidades
 from app.services.inteligencia_climatica import enriquecer_cidades
 from app.services.weather import buscar_clima, WeatherServiceError, normalizar_grupo_condicao
+from app.services.previsao_alertas import buscar_previsao_proximo_dia, gerar_alertas_eventos, montar_config_mapa_alerta
 from datetime import datetime, timedelta
 import io
 import random
@@ -35,7 +36,9 @@ def atualizar_cidade_com_dados_api(cidade):
         vento=dados_clima["vento"],
         condicao=dados_clima["condicao"],
         grupo_condicao=dados_clima["grupo_condicao"],
-        emoji=dados_clima["emoji"]
+        emoji=dados_clima["emoji"],
+        lat=dados_clima["lat"],
+        lon=dados_clima["lon"],
     )
 
 
@@ -135,6 +138,8 @@ def adicionar():
                 condicao=dados_clima["condicao"],
                 grupo_condicao=dados_clima["grupo_condicao"],
                 emoji=dados_clima["emoji"],
+                lat=dados_clima["lat"],
+                lon=dados_clima["lon"],
                 adicionado_por_id=session.get("usuario_id"),
                 adicionado_por_nome=session.get("usuario_nome")
             )
@@ -234,6 +239,60 @@ def deletar(id):
     else:
         flash("Cidade não encontrada para exclusão.", "erro")
     return redirect(url_for("cidades.index"))
+
+
+@cidades_bp.route("/cidade/detalhes/<int:id>")
+def detalhes(id):
+    """Exibe previsão do próximo dia, alertas e área afetada no mapa."""
+    if not usuario_logado():
+        return redirect(url_for("auth.login"))
+
+    cidade = buscar_cidade_por_id(id)
+    if not cidade:
+        flash("Cidade não encontrada.", "erro")
+        return redirect(url_for("cidades.index"))
+
+    lat = getattr(cidade, "lat", None)
+    lon = getattr(cidade, "lon", None)
+
+    try:
+        previsao = buscar_previsao_proximo_dia(
+            nome_cidade=f"{cidade.nome},{cidade.pais}" if cidade.pais else cidade.nome,
+            lat=lat,
+            lon=lon,
+        )
+    except WeatherServiceError:
+        previsao = {
+            "data_label": "Amanhã",
+            "temperatura": cidade.temperatura,
+            "temp_min": cidade.temp_min,
+            "temp_max": cidade.temp_max,
+            "umidade": cidade.umidade,
+            "vento": cidade.vento,
+            "chuva_prob": 35,
+            "condicao": cidade.condicao,
+            "grupo_condicao": cidade.grupo_condicao,
+            "emoji": cidade.emoji,
+            "lat": lat,
+            "lon": lon,
+        }
+
+    if lat is None:
+        lat = previsao.get("lat")
+    if lon is None:
+        lon = previsao.get("lon")
+
+    alertas, raio_afetado_km = gerar_alertas_eventos(previsao)
+    mapa_config = montar_config_mapa_alerta(lat, lon, raio_afetado_km, alertas)
+
+    return render_template(
+        "details.html",
+        cidade=cidade,
+        previsao=previsao,
+        alertas=alertas,
+        raio_afetado_km=raio_afetado_km,
+        mapa_config=mapa_config,
+    )
 
 @cidades_bp.route("/cidade/grafico/<int:id>")
 def grafico(id):

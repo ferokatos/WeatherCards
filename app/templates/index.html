@@ -65,6 +65,7 @@
 
                 <div class="card-cidade" id="card-{{ cidade.id }}">
                     <div class="card-frente">
+                        <a class="touch-card" href="{{ url_for('cidades.detalhes', id=cidade.id) }}" aria-label="Abrir detalhes de {{ cidade.nome }}">
 
                         <div class="card-header-cidade">
                             <div class="cidade-header-copy">
@@ -87,7 +88,7 @@
                                     type="button"
                                     class="btn-virar"
                                     data-grafico="{{ url_for('cidades.grafico', id=cidade.id) }}"
-                                    onclick="abrirModalGrafico('modal-{{ cidade.id }}', this.dataset.grafico)"
+                                    onclick="abrirModalGrafico(event, 'modal-{{ cidade.id }}', this.dataset.grafico)"
                                     title="Abrir gráfico em destaque"
                                 >
                                     📊
@@ -124,8 +125,10 @@
 
                         <div class="cidade-footer-meta">
                             <small>Adicionado por: {{ cidade.adicionado_por_nome }}</small>
-                            <small>Atualização em memória</small>
+                            <small>Clique no card para ver previsão e alertas</small>
                         </div>
+
+                        </a>
 
                         <div class="card-actions">
                             {% if is_dono or is_admin %}
@@ -140,6 +143,7 @@
                                 </form>
                             {% endif %}
                         </div>
+                    </div>
 
                         <dialog id="modal-{{ cidade.id }}" class="modal-grafico" onclick="fecharModalSeClicarFora(event, this)">
                             <div class="modal-content">
@@ -153,7 +157,6 @@
                                 <img src="" class="grafico-expandido" alt="Gráfico ampliado de {{ cidade.nome }}">
                             </div>
                         </dialog>
-                    </div>
                 </div>
 
             {% endfor %}
@@ -201,7 +204,11 @@
     {% endif %}
 
     <script>
-        function abrirModalGrafico(modalId, imgSrc) {
+        function abrirModalGrafico(event, modalId, imgSrc) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             const modal = document.getElementById(modalId);
             const imgExpandida = modal.querySelector('.grafico-expandido');
             if (imgExpandida.getAttribute('src') !== imgSrc) {

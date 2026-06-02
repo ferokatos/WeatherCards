@@ -12,6 +12,91 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')  # necessário para rodar sem interface gráfica no servidor
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')  # Para não abrir janelas no servidor
+import matplotlib.pyplot as plt
+import io
+import base64
+import pygal
+from pygal.style import DarkStyle
+
+def criar_grafico_svg(dados_api):
+    # Criando o gráfico de linha com o tema escuro integrado e moldura transparente
+    # Criando o grafico de linha com o tema escuro integrado e moldura transparente
+    estilo_costumizado = DarkStyle(
+        background='transparent',
+        plot_background='transparent',
+        foreground='#94a3b8',        # cor dos textos e legendas
+        foreground_strong='#f1f5f9', # cor dos titulos
+        foreground_subtle='#64748b', # cor dos rotulos e grades
+        grid_color='rgba(148, 163, 184, 0.2)', # cor das linhas de grade com transparencia
+        colors=('#38bdf8', '#f43f5e', '#34d399') # cores para as linhas (azul, vermelho, verde)
+    )
+    #exibição de grafico 
+    line_chart = pygal.Line(
+        width=850, 
+        height=360, 
+        style=estilo_costumizado,
+        interpolate='cubic',  # linhas suavizadas
+        show_dots=False,  # mostra os pontos de dados
+        stroke_style={'width': 3},  # largura das linhas
+        include_x_axis=True,
+    )
+
+
+    
+    # Customizações estéticas para ficar super moderno
+    line_chart.legend_at_bottom = True  # Legendas na parte de baixo para dar mais espaço
+    line_chart.legend_at_bottom_columns = 3         # Pontos mais visíveis nas linhas
+    
+    
+    line_chart.x_labels = [ponto['data'] for ponto in dados_api]
+    
+    # 2. Injetando as 3 séries de dados exatamente como o gráfico antigo fazia
+    line_chart.add('Temperatura (°C)', [ponto['temp'] for ponto in dados_api])
+    line_chart.add('Umidade (%)', [ponto['umi'] for ponto in dados_api])
+
+    if dados_api and 'vento' in dados_api[0]:
+        line_chart.add('Vento (km/h)', [ponto['vento'] for ponto in dados_api])
+    
+    # 3. Renderiza o código SVG puro para o JavaScript injetar no HTML
+    return line_chart.render_data_uri()
+
+def gerar_grafico_turbinado(dados_api):
+    # Exemplo de dados vindos da API
+    datas = [ponto['data'] for ponto in dados_api]
+    temperaturas = [ponto['temp'] for ponto in dados_api]
+    umidades = [ponto['umi'] for ponto in dados_api]
+
+    # Criando a figura com tamanho bom para o modal
+    fig, ax1 = plt.subplots(figsize=(7, 4), facecolor='none') # 'none' deixa o fundo transparente!
+
+    # Configurando o primeiro eixo (Temperatura - Linha Vermelha)
+    color = '#e74c3c'
+    ax1.set_xlabel('Horários (Previsão)', color='#ffffff')
+    ax1.set_ylabel('Temperatura (°C)', color=color)
+    ax1.plot(datas, temperaturas, color=color, marker='o', linewidth=2.5, label='Temp')
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.tick_params(axis='x', labelcolor='#ffffff', rotation=15) # Rotaciona para não embolar o texto
+    ax1.grid(True, linestyle=':', alpha=0.2, color='#ffffff')
+
+    # Criando o segundo eixo que compartilha o mesmo lado X (Umidade - Linha Azul)
+    ax2 = ax1.twinx()  
+    color = '#3498db'
+    ax2.set_ylabel('Umidade (%)', color=color)
+    ax2.plot(datas, umidades, color=color, marker='x', linestyle='--', linewidth=2, label='Umid')
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    plt.tight_layout()
+
+    # Salvando na memória para mandar direto pro HTML (sem salvar arquivo no PC)
+    img = io.BytesIO()
+    plt.savefig(img, format='png', bbox_inches='tight', transparent=True)
+    img.seek(0)
+    graph_url = base64.b64encode(img.getvalue()).decode()
+    plt.close()
+    
+    return f"data:image/png;base64,{graph_url}"
 
 cidades_bp = Blueprint("cidades", __name__)
 
@@ -108,6 +193,20 @@ def index():
     cidades_filtradas = cidades_filtradas[::-1]
     cidades_dashboard = enriquecer_cidades(cidades_filtradas)
 
+    # 1. testando a geração do gráfico com dados simulados para o painel principal
+    cidades_dashboard = enriquecer_cidades(cidades_filtradas)
+
+    # 2. Gera o gráfico para a tela usando apenas os dados de teste originais
+    dados_painel_principal = [
+        {"data": "12:00", "temp": 22.5, "umi": 60, "vento": 12.4},
+        {"data": "15:00", "temp": 23.0, "umi": 58, "vento": 14.1},
+        {"data": "18:00", "temp": 24.2, "umi": 55, "vento": 11.5},
+        {"data": "21:00", "temp": 25.0, "umi": 53, "vento": 10.2},
+        {"data": "24:00", "temp": 26.3, "umi": 50, "vento": 8.7},
+        {"data": "27:00", "temp": 27.1, "umi": 48, "vento": 9.3},
+    ]
+    meu_grafico_svg = criar_grafico_svg(dados_painel_principal)
+
     return render_template(
         "index.html",
         cidades=cidades_dashboard,
@@ -115,7 +214,12 @@ def index():
         filtro_condicao=filtro_condicao,
         filtros_temperatura=FILTRO_TEMPERATURA_OPCOES,
         filtros_condicao=FILTRO_CONDICAO_OPCOES,
+        
+        # Passa o gráfico corrigido para a página inicial
+        grafico_geral=meu_grafico_svg
     )
+
+
 
 @cidades_bp.route("/cidade/adicionar", methods=["GET", "POST"])
 def adicionar():

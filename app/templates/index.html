@@ -156,11 +156,14 @@
                                         <h3>Histórico Expandido — {{ cidade.nome }}</h3>
                                         <p class="modal-subtitle">Leitura de temperatura, umidade e vento em janela ampliada.</p>
                                     </div>
-                                    <button type="button" class="btn-close-modal" onclick="this.closest('dialog').close()">✖</button>
+                                    <button type="button" class="btn-close-modal" onclick="this.closest('dialog').close()">✖</button>                               
                                 </div>
-                                <img src="" class="grafico-expandido" alt="Gráfico ampliado de {{ cidade.nome }}">
-                            </div>
+                                <div style="background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 10px; overflow: hidden;">
+    <embed type="image/svg+xml" class="grafico-expandido" src="" style="width: 100%; height: 380px; display: block; background: transparent; border: none; filter: drop-shadow(0px 0px 0px transparent);" />
+</div>
+
                         </dialog>
+
                 </div>
 
             {% endfor %}
@@ -206,20 +209,36 @@
         <p style="color: var(--text-light);">Sua opinião é muito importante para nós.</p>
     </div>
     {% endif %}
+    <!--Gráfico geral-->
+    <div class="container-grafico-principal" style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="color: #ffffff; margin-top: 0; margin-bottom: 15px; font-family: sans-serif;">📊 Tendência Climática Geral</h3>
+    
+    {% if grafico_geral %}
+        <embed type="image/svg+xml" src="{{ grafico_geral }}" style="width: 100%; max-height: 350px; display: block; background: transparent;" />
+    {% else %}
+        <p style="color: #94a3b8;">Nenhum dado disponível para gerar o gráfico.</p>
+    {% endif %}
+</div>
+    
 
     <script>
         function abrirModalGrafico(event, modalId, imgSrc) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            const modal = document.getElementById(modalId);
-            const imgExpandida = modal.querySelector('.grafico-expandido');
-            if (imgExpandida.getAttribute('src') !== imgSrc) {
-                imgExpandida.src = imgSrc;
-            }
-            modal.showModal();
-        }
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const modal = document.getElementById(modalId);
+    // Procura o elemento <embed> do Pygal dentro do modal
+    const graficoExpandido = modal.querySelector('.grafico-expandido');
+    
+    if (graficoExpandido) {
+        // Altera o atributo src da tag <embed> de forma correta
+        graficoExpandido.setAttribute('src', imgSrc);
+    }
+    
+    modal.showModal();
+}
 
         function fecharModalSeClicarFora(event, modal) {
             if (event.target === modal) {

@@ -8,7 +8,7 @@ import requests
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
-API_KEY = os.getenv("OPENWEATHER_API_KEY")
+API_KEY = os.getenv("OPENWEATHER_API_KEY", "2a79b1d791ec76bc0c714a36401ed402" )
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 DEFAULT_UNITS = "metric"
 DEFAULT_LANG = "pt_br"

@@ -24,6 +24,16 @@
         </div>
     </section>
 
+        <div class="container-grafico-principal" style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="color: #ffffff; margin-top: 0; margin-bottom: 15px; font-family: sans-serif;">📊 Tendência Climática Geral</h3>
+    
+    {% if grafico_geral %}
+        <embed type="image/svg+xml" src="{{ grafico_geral }}" style="width: 100%; max-height: 350px; display: block; background: transparent;" />
+    {% else %}
+        <p style="color: #94a3b8;">Nenhum dado disponível para gerar o gráfico.</p>
+    {% endif %}
+</div>
+
     <div class="filtros-dashboard surface-panel">
         <form method="GET" class="form-filtros-dashboard">
             <div class="filtro-bloco">
@@ -209,17 +219,6 @@
         <p style="color: var(--text-light);">Sua opinião é muito importante para nós.</p>
     </div>
     {% endif %}
-    <!--Gráfico geral-->
-    <div class="container-grafico-principal" style="background-color: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <h3 style="color: #ffffff; margin-top: 0; margin-bottom: 15px; font-family: sans-serif;">📊 Tendência Climática Geral</h3>
-    
-    {% if grafico_geral %}
-        <embed type="image/svg+xml" src="{{ grafico_geral }}" style="width: 100%; max-height: 350px; display: block; background: transparent;" />
-    {% else %}
-        <p style="color: #94a3b8;">Nenhum dado disponível para gerar o gráfico.</p>
-    {% endif %}
-</div>
-    
 
     <script>
         function abrirModalGrafico(event, modalId, imgSrc) {

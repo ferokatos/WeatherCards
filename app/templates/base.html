@@ -1,4 +1,3 @@
-<!-- Template base — todos os outros herdam daqui -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -35,6 +34,9 @@
                         <a href="{{ url_for('cidades.index') }}">Dashboard</a>
                         <a href="{{ url_for('cidades.adicionar') }}">Adicionar Cidade</a>
                         <a href="{{ url_for('cidades.mudanca_climatica') }}">🌍 Mudança Climática</a>
+                        
+                        <a href="{{ url_for('viagem.planejar') }}">🗺️ Planejar Viagem</a>
+                        
                         {% if session.get('cargo') == 'admin' %}
                             <a href="{{ url_for('admin.painel') }}">Painel Admin</a>
                         {% endif %}

@@ -1,4 +1,4 @@
-#!C:\Users\Família\OneDrive\Documentos\WeatherCards\venv\Scripts\python.exe
+#!C:\Users\maria\Downloads\projeto\WeatherCards\venv\Scripts\python.exe
 # -*- coding: utf-8 -*-
 # This file is part of pygal
 #

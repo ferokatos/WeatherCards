@@ -9,7 +9,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-Acesse: http://127.0.0.1:5001
+Acesse: http://127.0.0.1:5001 || https://weather-cards-web.onrender.com/
 
 > Crie um arquivo `.env` na raiz do projeto com a chave OpenWeather em `OPENWEATHER_API_KEY` (veja a seção [API Utilizada](#-api-utilizada)).
 
